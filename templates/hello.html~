@@ -1,0 +1,11 @@
+<html>
+<body>
+<form action="" method="post">{% csrf_token %}
+first name : <br>
+<input type = "text" name = "firstname"><br>
+usn :<br>
+<input type="text" name = "lastname">
+<input type="submit" value="Submit">
+</form>
+</body>
+</html>

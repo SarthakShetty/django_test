@@ -15,14 +15,15 @@ from django.db import models
 # Create your models here.
 
 class group(models.Model):
-	g_id = models.CharField(max_length=25)
+	g_id = models.CharField(max_length=25,primary_key=True)
 	name = models.CharField(max_length=25)
 	date_creation = models.DateTimeField('date published')
 	destination = models.CharField(max_length=50)
 
 class group_message(models.Model):
-	gm_id = models.CharField(max_length=25)
+	gm_id = models.CharField(max_length=25,primary_key=True)
 	video_url = models.URLField(max_length=100)
 	photo_url = models.URLField(max_length=100)
 	text = models.CharField(max_length=500)
+
 

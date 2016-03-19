@@ -32,5 +32,14 @@ class Group_message(models.Model):
 	video_url = models.URLField(max_length=100)
 	photo_url = models.URLField(max_length=100)
 	text = models.CharField(max_length=500)
+	
+	
+class UserIsAdminGroup(models.Model):
+	g_id = models.ForeignKey('group', on_delete=models.CASCADE, primary_key=True)
+	phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
+	
+class UserIsGroupMember(models.Model):
+	g_id = models.ForeignKey('group', on_delete=models.CASCADE, primary_key=True)
+	phone_number = models.ForeignKey('user', on_delete=models.CASCADE, primary_key=True)
 
 

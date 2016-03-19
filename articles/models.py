@@ -26,3 +26,12 @@ class group_message(models.Model):
 	photo_url = models.URLField(max_length=100)
 	text = models.CharField(max_length=500)
 
+class user_is_admin_group:
+	g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+	phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
+	
+class user_is_group_member:
+	g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+	phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
+	
+	

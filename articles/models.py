@@ -14,14 +14,21 @@ from django.db import models
 
 # Create your models here.
 
-class group(models.Model):
-	g_id = models.CharField(max_length=25,primary_key=True)
+class User(models.Model):
+    phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
+    age = models.IntegerField()
+    name = models.CharField(max_length=50)
+    photo_url = models.URLField(max_length=100)
+    date_creation = models.DateField(DateField.auto_now_add)
+
+class Group(models.Model):
+	g_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
 	name = models.CharField(max_length=25)
-	date_creation = models.DateTimeField('date published')
+	date_creation = models.DateField(DateField.auto_now_add)
 	destination = models.CharField(max_length=50)
 
-class group_message(models.Model):
-	gm_id = models.CharField(max_length=25,primary_key=True)
+class Group_message(models.Model):
+	gm_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
 	video_url = models.URLField(max_length=100)
 	photo_url = models.URLField(max_length=100)
 	text = models.CharField(max_length=500)

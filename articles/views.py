@@ -30,23 +30,24 @@ def hello(request):
  	global final_dict
  	global json_dict
  	global result_dict
-	if request.method=="GET":
-		print '--------------------GET--------------------'
-		json_dict =json.dumps(final_dict,sort_keys=True,indent=4,separators=(',',': ')) 
-		print '--------------------GET--------------------'
-		print '\n\n'
-		return HttpResponse('{ "route" :['+  json_dict+ "\n]}") #Back to front end
-	else:
-		print '--------------------POST--------------------'
-		data =  request.body[1:-1].split(",")
-		#data = [x.strip(' ') for x in data]
-		#print data
-		getPlaces(data[2:])
-		#print result_dict
-		final_dict = run(data[0],data[1],result_dict)  #Goes into Feature1_Module2
-		print '--------------------POST--------------------'
-		print '\n\n'
-		return HttpResponse(data)
+ 	if request.method=="GET":
+ 	    print '--------------------GET--------------------'
+ 	    json_dict =json.dumps(final_dict,sort_keys=True,indent=4,separators=(',',': ')) 
+ 	    print '--------------------GET--------------------'
+ 	    print '\n\n'
+ 	    return HttpResponse('{ "route" :['+  json_dict+ "\n]}") #Back to front end
+ 	else:
+ 	    print '--------------------POST--------------------'
+ 	    data =  request.body[1:-1].split(",")
+ 	    #data = [x.strip(' ') for x in data]
+ 	    #print data
+ 	    getPlaces(data[2:])
+ 	    #print result_dict
+ 	    final_dict = run(data[0],data[1],result_dict)  #Goes into Feature1_Module2
+ 	    print '--------------------POST--------------------'
+ 	    print '\n\n'
+ 	    return HttpResponse(data)
+
 @csrf_exempt	
 def hello_template(request):
 	global full_dict

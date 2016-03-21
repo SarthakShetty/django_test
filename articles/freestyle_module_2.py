@@ -32,7 +32,10 @@ except:
     exit()
 
 #sw32 key
-api_key='AIzaSyBrXJNEr1v33CEFxzA9AbPwhrIJfvJlmB8'
+#api_key='AIzaSyBrXJNEr1v33CEFxzA9AbPwhrIJfvJlmB8'
+#api_key='AIzaSyDVBHURLnqAK1R34J2fb3Q6E0137aVl_Ws' # Sameer's K
+#api_key='AIzaSyCQd3oHe34SNelQzLuT6KSdA3ajCqt-gp8'
+api_key = 'AIzaSyDhFZ_MRtG4Xy1IY5zZMUPnWsg_loYAPnM'
 
 url='https://maps.googleapis.com/maps/api/geocode/json?address=__HOLDER__&key=%s' %api_key
 

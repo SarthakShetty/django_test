@@ -17,6 +17,7 @@ result_dict = dict()
 final_dict=dict()
 json_str = ""
 json_dict = ""
+json_places = ""
 
 def getPlaces(data):
 	global full_dict
@@ -26,7 +27,8 @@ def getPlaces(data):
 		if(i in full_dict.keys()):
 			result_dict[i] = full_dict[i]
 @csrf_exempt
-def Feature2(request):
+def test(request):
+	global json_places
 	if request.method=="POST":
 		l = request.body.split("::")
 		location = l[0]
@@ -34,6 +36,8 @@ def Feature2(request):
 		json_places = roundabout.feature2(location,int(radius)*1000)
 		print json_places
 		return HttpResponse(json.dumps(json_places))
+	else:
+		return HttpResponse
 	
 @csrf_exempt
 def Feature1_Module2(request):

@@ -56,23 +56,23 @@ class UserIsGroupMember(models.Model):
 	    unique_together = ("g_id", "phone_number")
 
 class UserSendsGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User',on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message',on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group',on_delete=models.CASCADE)
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
     class Meta:
 	    unique_together = ("phone_number", "gm_id")
 
 class UserReceivesGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User',on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message',on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group',on_delete=models.CASCADE)
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
     class Meta:
 	    unique_together = ("phone_number", "gm_id")
 	    
 class Places(models.Model):
-	place_id = models.CharField(max_length=100,primary_key=True)
+	place_id = models.CharField(max_length=100, primary_key=True)
 	place_name = models.CharField(max_length=100)
 	place_geo_location = models.CharField(max_length=100)
 	place_description = models.CharField(max_length=1000)
@@ -85,17 +85,19 @@ class Trip(models.Model):
 	trip_end_datetime = models.DateTimeField(default=timezone.now)
 
 
-class Places_in_trip(models.Model):
-	trip_id = models.OneToOneField('Trip',on_delete=models.CASCADE)
-	place_id = models.OneToOneField('Places',on_delete=models.CASCADE)
+class PlacesInTrip(models.Model):
+	trip_id = models.OneToOneField('Trip', on_delete=models.CASCADE)
+	place_id = models.OneToOneField('Places', on_delete=models.CASCADE)
 	place_checkin_datetime = models.DateTimeField(default=timezone.now)
+	
 	class Meta:
 	    unique_together = ("trip_id", "place_id")
 
 
-class User_trips(models.Model):
+class UserTrips(models.Model):
 	phone_number = models.OneToOneField('User',on_delete=models.CASCADE)
 	trip_id = models.OneToOneField('Trip',on_delete=models.CASCADE)
+	
 	class Meta:
 	    unique_together = ("phone_number", "trip_id")
 

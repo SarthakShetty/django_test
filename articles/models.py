@@ -72,11 +72,9 @@ class UserReceivesGroupMessage(models.Model):
 	    unique_together = ("phone_number", "gm_id")
 	    
 class Places(models.Model):
-	place_id = models.CharField(max_length=100, primary_key=True)
+	place_id = models.AutoField(primary_key=True)
 	place_name = models.CharField(max_length=100)
-	place_geo_location = models.CharField(max_length=100)
-	place_description = models.CharField(max_length=1000)
-	place_reviews = models.CharField(max_length=1000)
+	
 
 class Trip(models.Model):
 	trip_id = models.AutoField(primary_key=True)

@@ -1,79 +1,208 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.template.loader import get_template
-from django.core import serializers
-from django.template import Context
-from django.template import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-import json
-from freestyle_module_1 import *
-from freestyle_module_2 import *
-import roundabout
+'''
+user(phone_number(pkey),age,name,photo_url,date_creation)
+group(g_id(pkey),name,date_creation, destination)
+group_message(gm_id(pkey),video_url,photo_url,text)
+user_is_admin_group(g_id(pkey)(fkey from group),phone_number(fkey from user))
+user_is_group_member(g_id(pkey)(fkey from group),phone_number(pkey)(fkey from user))
+user_send_group_message(phone_number(pkey)(fkey from user),gm_id(pkey)(fkey from group_message),g_id(fkey from group))
+user_receives_group_message(phone_number(pkey)(fkey from user),gm_id(pkey)(fkey from group_message),g_id(fkey from group))
+places(place_id(pkey), place_name, place_geo_location, place_description, place_reviews)
+places_in_trip(trip_id(pkey)(fkey from trip), place_id(pkey)(fkey references from places), place_checkin_datetime)
+trip(trip_id(pkey), trip_review, trip_start_datetime, trip_end_datetime)
+user_trips(phone_number(pkey)(fkey from user), trip_id(pkey)(fkey from trips))
+'''
+
+from __future__ import unicode_literals
+
+from django.db import models
+from django.utils import timezone
+import datetime
+# Create your models here.
+
+class User(models.Model):
+    phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
+    age = models.IntegerField()
+    name = models.CharField(max_length=50)
+    photo_url = models.URLField(max_length=100)
+    date_creation = models.DateTimeField(default=timezone.now)
 
 
-data=[]
-full_dict =  dict()
-result_dict = dict()
-final_dict=dict()
-json_str = ""
-json_dict = ""
-
-def getPlaces(data):
-	global full_dict
-	global result_dict
-	#print full_dict
-	for i in data:
-		if(i in full_dict.keys()):
-			result_dict[i] = full_dict[i]
-@csrf_exempt
-def Feature2(request):
-	if request.method=="POST":
-		l = request.body.split("::")
-		location = l[0]
-		radius = l[1][0:-2]
-		json_places = roundabout.feature2(location,int(radius)*1000)
-		print json_places
-		return HttpResponse(json.dumps(json_places))
+class Group(models.Model):
+	g_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
+	name = models.CharField(max_length=25)
+	date_creation = models.DateTimeField(default=timezone.now)
+	destination = models.CharField(max_length=50)
 	
-@csrf_exempt
-def Feature1_Module2(request):
- 	global final_dict
- 	global json_dict
- 	global result_dict
- 	if request.method=="GET":
- 	    print '--------------------GET--------------------'
- 	    json_dict =json.dumps(final_dict,sort_keys=True,indent=4,separators=(',',': ')) 
- 	    print '--------------------GET--------------------'
- 	    print '\n\n'
- 	    return HttpResponse('{ "route" :['+  json_dict+ "\n]}") #Back to front end
- 	else:
- 	    print '--------------------POST--------------------'
- 	    data =  request.body[1:-1].split(",")
- 	    #data = [x.strip(' ') for x in data]
- 	    #print data
- 	    getPlaces(data[2:])
- 	    #print result_dict
- 	    final_dict = run(data[0],data[1],result_dict)  #Goes into Feature1_Module2
- 	    print '--------------------POST--------------------'
- 	    print '\n\n'
- 	    return HttpResponse(data)
 
-@csrf_exempt	
-def Feature1_Module1(request):
-	global full_dict
-	global json_str
-	if request.method=="GET":
-		print '--------------------GET--------------------'
-		print '--------------------GET--------------------'
-		print '\n\n'
-		return HttpResponse(json_str) #Back to front end
-	else:
-		print '--------------------POST--------------------'
-		data =  request.body.split("::")
-		print data[0],'\n',data[1]
-		#print full_dict
-		full_dict = get_points_of_interest(data[0],data[1]) #Goes into Feature1_Module1
-		json_str = json.dumps(full_dict,sort_keys=True,indent=4,separators=(',',': '))
-		print '--------------------POST--------------------'
-		print '\n\n'
-		return HttpResponse("Success")
+class GroupMessage(models.Model):
+	gm_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
+	video_url = models.URLField(max_length=100)
+	photo_url = models.URLField(max_length=100)
+	text = models.CharField(max_length=500)
+
+
+class UserIsAdminGroup(models.Model):
+	g_id = models.OneToOneField('group', on_delete=models.CASCADE)
+	phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+	
+	class Meta:
+	    unique_together = ("g_id", "phone_number")
+
+
+class UserIsGroupMember(models.Model):
+	g_id = models.OneToOneField('group', on_delete=models.CASCADE)
+	phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+	latitude = models.FloatField()
+	longitude = models.FloatField()
+	
+	class Meta:
+	    unique_together = ("g_id", "phone_number")
+
+
+class UserSendsGroupMessage(models.Model):
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    
+    class Meta:
+	    unique_together = ("phone_number", "gm_id")
+
+
+class UserReceivesGroupMessage(models.Model):
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    
+    class Meta:
+	    unique_together = ("phone_number", "gm_id")
+	
+
+class Places(models.Model):
+	place_id = models.CharField(max_length=100, primary_key=True)
+	place_name = models.CharField(max_length=100)
+	place_geo_location = models.CharField(max_length=100)
+	place_description = models.CharField(max_length=1000)
+	place_reviews = models.CharField(max_length=1000)
+
+
+class Trip(models.Model):
+	trip_id = models.AutoField(primary_key=True)
+	trip_review = models.CharField(max_length=1000)
+	trip_start_datetime = models.DateTimeField(default=timezone.now)
+	trip_end_datetime = models.DateTimeField(default=timezone.now)
+
+
+class PlacesInTrip(models.Model):
+	trip_id = models.OneToOneField('Trip', on_delete=models.CASCADE)
+	place_id = models.OneToOneField('Places', on_delete=models.CASCADE)
+	place_checkin_datetime = models.DateTimeField(default=timezone.now)
+	
+	class Meta:
+	    unique_together = ("trip_id", "place_id")
+
+
+class UserTrips(models.Model):
+	phone_number = models.OneToOneField('User',on_delete=models.CASCADE)
+	trip_id = models.OneToOneField('Trip',on_delete=models.CASCADE)
+	
+	class Meta:
+	    unique_together = ("phone_number", "trip_id")
+
+
+def create_new_user(name, age, phone_number, date_creation=None, photo_url=None):
+	if date_creation == None: 
+		date_creation = timezone.now
+	try:
+		User.objects.create(name=name, age=age, phone_number=phone_number, date_creation=date_creation, photo_url=photo_url)
+	
+	except:
+		raise Exception("Error during creating user")
+
+
+def create_new_group(name, destination, date_creation=None):
+	if date_creation == None: 
+		date_creation = timezone.now
+	try:
+		return Group.objects.create(name=name, date_creation=date_creation, destination=destination).g_id  # create the table entry and then return g_id to the front end
+
+	except:
+		raise Exception("Error during creating group")
+
+
+def add_member_to_group(g_id, phone_number):
+	try:
+		UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+
+	except:
+		raise Exception("Error during adding " +str(phone_number) + " to group " + str(g_id))
+
+
+def make_admin(g_id, phone_number):
+	''' This function will remove the existing admin to create a new admin '''
+	try:
+		AdminEntry, isNewEntry = UserIsGroupMember.objects.get_or_create(g_id=g_id, default={'phone_number': phone_number})
+
+		if(not isNewEntry):	# if an admin has already been assigned, delete the existing entry
+			tableEntry.delete()
+			UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+
+	except:
+		raise Exception("Error during making " + str(phone_number) + " admin of group " + str(g_id))
+
+
+def send_message_to_group(phone_number, g_id, video_url=None, photo_url=None, text=None):
+	''' this function automatically handles 
+		-	message creation
+		-	updating the send table
+		-	updating the receive table for all recipients in the group
+	'''
+
+	if video_url == None and photo_url == None and text == None:
+		return
+
+	try:	
+		messageEntry = GroupMessage.objects.create(video_url=video_url, photo_url=photo_url, text=text)
+	except:
+		raise Exception("Error during message creation")
+
+	try:
+		UserSendsGroupMessage.objects.create(phone_number=phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
+
+	except:
+		raise Exception("Error updating the table for sender")
+
+	try:
+		for tableEntry in Entry.objects.filter(g_id=g_id):
+			UserReceivesGroupMessage.objects.create(phone_number=tableEntry.phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
+
+	except: 
+		raise Exception("Error updating table for recipients")
+
+
+def get_member_coordinates(g_id):
+	try:
+		L = []
+		for userEntry in UserIsGroupMember.objects.filter(g_id=g_id):
+			L.append( (User.objects.get(phone_number=userEntry.phone_number).name, 
+				{'latitude': userEntry.latitude, 'longitude': userEntry.longitude}) )
+
+		return L
+
+	except:
+		raise Exception("Error accessing location for group with id " + str(g_id))
+
+
+def update_user_location(phone_number, latitude, longitude):
+	try:
+		userEntry = UserIsGroupMember.objects.filter(phone_number=phone_number) 
+
+		userEntry.latitude, userEntry.longitude = latitude, longitude
+
+	except:
+		raise Exception("Error updating location")
+
+
+
+
+
+	

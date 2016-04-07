@@ -20,11 +20,11 @@ import datetime
 # Create your models here.
 
 class User(models.Model):
-    phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
-    age = models.IntegerField()
-    name = models.CharField(max_length=50)
-    photo_url = models.URLField(max_length=100)
-    date_creation = models.DateTimeField(default=timezone.now)
+    	phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
+    	age = models.IntegerField()
+    	name = models.CharField(max_length=50)
+    	photo_url = models.URLField(max_length=100)
+    	date_creation = models.DateTimeField(default=timezone.now)
 
 
 class Group(models.Model):
@@ -60,20 +60,20 @@ class UserIsGroupMember(models.Model):
 
 
 class UserSendsGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
-    class Meta:
-	    unique_together = ("phone_number", "gm_id")
+    	class Meta:
+		unique_together = ("phone_number", "gm_id")
 
 
 class UserReceivesGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
-    
-    class Meta:
+	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+	
+	class Meta:
 	    unique_together = ("phone_number", "gm_id")
 	
 

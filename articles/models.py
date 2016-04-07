@@ -10,7 +10,6 @@ places(place_id(pkey), place_name, place_geo_location, place_description, place_
 places_in_trip(trip_id(pkey)(fkey from trip), place_id(pkey)(fkey references from places), place_checkin_datetime)
 trip(trip_id(pkey), trip_review, trip_start_datetime, trip_end_datetime)
 user_trips(phone_number(pkey)(fkey from user), trip_id(pkey)(fkey from trips))
-
 '''
 
 from __future__ import unicode_literals
@@ -21,11 +20,12 @@ import datetime
 # Create your models here.
 
 class User(models.Model):
-    phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
-    age = models.IntegerField()
-    name = models.CharField(max_length=50)
-    photo_url = models.URLField(max_length=100)
-    date_creation = models.DateTimeField(default=timezone.now)
+    	phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
+    	age = models.IntegerField()
+    	name = models.CharField(max_length=50)
+    	photo_url = models.URLField(max_length=100)
+    	date_creation = models.DateTimeField(default=timezone.now)
+
 
 class Group(models.Model):
 	g_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
@@ -34,7 +34,7 @@ class Group(models.Model):
 	destination = models.CharField(max_length=50)
 	
 
-class Group_message(models.Model):
+class GroupMessage(models.Model):
 	gm_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
 	video_url = models.URLField(max_length=100)
 	photo_url = models.URLField(max_length=100)
@@ -48,35 +48,42 @@ class UserIsAdminGroup(models.Model):
 	class Meta:
 	    unique_together = ("g_id", "phone_number")
 
+
 class UserIsGroupMember(models.Model):
 	g_id = models.OneToOneField('group', on_delete=models.CASCADE)
 	phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+	latitude = models.FloatField()
+	longitude = models.FloatField()
 	
 	class Meta:
 	    unique_together = ("g_id", "phone_number")
 
+
 class UserSendsGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
-    class Meta:
-	    unique_together = ("phone_number", "gm_id")
+    	class Meta:
+		unique_together = ("phone_number", "gm_id")
+
 
 class UserReceivesGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
-    
-    class Meta:
+	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+	
+	class Meta:
 	    unique_together = ("phone_number", "gm_id")
-	    
+	
+
 class Places(models.Model):
 	place_id = models.CharField(max_length=100, primary_key=True)
 	place_name = models.CharField(max_length=100)
 	place_geo_location = models.CharField(max_length=100)
 	place_description = models.CharField(max_length=1000)
 	place_reviews = models.CharField(max_length=1000)
+
 
 class Trip(models.Model):
 	trip_id = models.AutoField(primary_key=True)
@@ -101,3 +108,97 @@ class UserTrips(models.Model):
 	class Meta:
 	    unique_together = ("phone_number", "trip_id")
 
+
+def create_new_user(name, age, phone_number, date_creation, photo_url=None):
+	try:
+		User.objects.create(name=name, age=age, phone_number=phone_number, date_creation=date_creation, photo_url=photo_url)
+	
+	except:
+		raise Exception("Error during creating user")
+
+
+def create_new_group(name, date_creation, destination):
+	try:
+		return Group.objects.create(name=name, date_creation=date_creation, destination=destination).g_id  # create the table entry and then return g_id to the front end
+
+	except:
+		raise Exception("Error during creating group")
+
+
+def add_member_to_group(g_id, phone_number):
+	try:
+		UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+
+	except:
+		raise Exception("Error during adding " +str(phone_number) + " to group " + str(g_id))
+
+
+def make_admin(g_id, phone_number):
+	''' This function will remove the existing admin to create a new admin '''
+	try:
+		AdminEntry, isNewEntry = UserIsGroupMember.objects.get_or_create(g_id=g_id, default={'phone_number': phone_number})
+
+		if(!isNewEntry):	# if an admin has already been assigned, delete the existing entry
+			tableEntry.delete()
+			UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+
+	except:
+		raise Exception("Error during making " + str(phone_number) + " admin of group " + str(g_id))
+
+
+def send_message_to_group(phone_number, g_id, video_url=None, photo_url=None, text=None):
+		''' this function automatically handles 
+			-	message creation
+			-	updating the send table
+			-	updating the receive table for all recipients in the group
+		'''
+
+	if video_url == None and photo_url == None and text == None:
+		return
+
+	try:	
+		messageEntry = GroupMessage.objects.create(video_url=video_url, photo_url=photo_url, text=text)
+	except:
+		raise Exception("Error during message creation")
+
+	try:
+		UserSendsGroupMessage.objects.create(phone_number=phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
+
+	except:
+		raise Exception("Error updating the table for sender")
+
+	try:
+		for tableEntry in Entry.objects.filter(g_id=g_id):
+			UserReceivesGroupMessage.objects.create(phone_number=tableEntry.phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
+
+	except: 
+		raise Exception("Error updating table for recipients")
+
+
+def get_member_coordinates(g_id):
+	try:
+		L = []
+		for userEntry in UserIsGroupMember.objects.filter(g_id=g_id):
+			L.append( (User.objects.get(phone_number=userEntry.phone_number).name, 
+				{'latitude': userEntry.latitude, 'longitude': userEntry.longitude}) )
+
+		return L
+
+	except:
+		raise Exception("Error accessing location for group with id " + str(g_id))
+
+
+def update_user_location(phone_number, latitude, longitude):
+	try:
+		userEntry = UserIsGroupMember.objects.filter(phone_number=phone_number) 
+
+		userEntry.latitude, userEntry.longitude = latitude, longitude
+
+	except:
+		raise Exception("Error updating location")
+
+
+
+
+
+	

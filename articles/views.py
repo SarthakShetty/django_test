@@ -10,6 +10,13 @@ from freestyle_module_1 import *
 from freestyle_module_2 import *
 import roundabout
 
+#feature 4 imports
+from random import shuffle
+from random import randrange
+from django.utils import timezone
+from queries import on_start_trip,on_finish_trip,check_in,display_trip_details,view_trips,check_if_trip_exists,insert_review,get_places
+from gen_diary import get_diary
+
 
 data=[]
 full_dict =  dict()
@@ -77,3 +84,94 @@ def Feature1_Module1(request):
 		print '--------------------POST--------------------'
 		print '\n\n'
 		return HttpResponse("Success")
+		
+		
+
+'''
+Feature4 Views
+'''
+
+input_dict={"Op":"7","phoneNumber":"hello","tripId":5,"placeName":"mumbai"}
+import json
+import re
+try:
+    import urllib2
+except:
+    print("Run with python2")
+output_dict={}
+def index(request):
+	if request.method == 'GET':
+		#input_dict=json.loads(request.body);
+		op_code=input_dict["Op"]
+		if op_code=="1":
+			phone_number=input_dict["phoneNumber"]
+			
+			trip_id=on_start_trip(phone_number)
+			output_dict["Op"]=op_code
+			output_dict["trip_id"]=trip_id
+			return HttpResponse(json.dumps(output_dict))
+		
+		elif op_code=="2":
+			place_name=input_dict["placeName"]
+			trip_id=input_dict["tripId"]
+			check_in(place_name,trip_id)
+			output_dict["Op"]=op_code
+			return HttpResponse(json.dumps(output_dict))
+		
+		elif op_code=="3":
+			trip_id=input_dict["tripId"]
+			d={}
+			d=display_trip_details(trip_id)
+			#startTime=d["startTime"]
+			count=d["count"]
+			output_dict["Op"]=op_code
+			#output_dict["startTime"]=startTime
+			output_dict["count"]=count
+			return HttpResponse(json.dumps(output_dict))
+		
+		elif op_code=="4":
+			#gen diary
+			phone_number=input_dict["phoneNumber"]
+			trip_id=input_dict["tripId"]
+			on_finish_trip(trip_id,phone_number)
+			output_dict["Op"]=op_code
+			return HttpResponse(json.dumps(output_dict))
+			
+		elif op_code=="5":
+			phone_number=input_dict["phoneNumber"]
+			d={}
+			d=view_trips(phone_number)
+			output_dict["Op"]=op_code
+			output_dict["Trips"]=d
+			return HttpResponse(json.dumps(output_dict))
+			
+		elif op_code=="6":
+			trip_id=input_dict["tripId"]
+			phone_number=input_dict["phoneNumber"]
+			c=check_if_trip_exists(trip_id,phone_number)
+			if c:
+				d={}
+				d=display_trip_details(trip_id)
+				#startTime=d["startTime"]
+				count=d["count"]
+				output_dict["Op"]=op_code
+				#output_dict["startTime"]=startTime
+				output_dict["count"]=count
+				return HttpResponse(json.dumps(output_dict))
+			else:
+				output_dict["Op"]=op_code
+				output_dict["count"]=-1
+				return HttpResponse(json.dumps(output_dict))
+				
+		elif op_code=="7":
+			#gen diary
+			
+			trip_id=input_dict["tripId"]
+			places=get_places(trip_id)
+			trip_review=get_diary(places)
+			
+			insert_review(trip_id,trip_review)
+			output_dict["Op"]=op_code
+			output_dict["review"]=trip_review
+			#output_dict["places"]=places
+			return HttpResponse(json.dumps(output_dict))

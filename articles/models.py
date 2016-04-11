@@ -14,10 +14,13 @@ user_trips(phone_number(pkey)(fkey from user), trip_id(pkey)(fkey from trips))
 '''
 
 from __future__ import unicode_literals
-
 from django.db import models
 from django.utils import timezone
 import datetime
+from django.utils.encoding import python_2_unicode_compatible
+@python_2_unicode_compatible
+
+
 # Create your models here.
 
 class User(models.Model):
@@ -26,6 +29,8 @@ class User(models.Model):
     name = models.CharField(max_length=50)
     photo_url = models.URLField(max_length=100)
     date_creation = models.DateTimeField(default=timezone.now)
+    def __str__(self):
+		return self.phone_number
 
 class Group(models.Model):
 	g_id = models.AutoField(primary_key=True) #Not given by the user, Automatically assigned to user and incremented
@@ -72,11 +77,8 @@ class UserReceivesGroupMessage(models.Model):
 	    unique_together = ("phone_number", "gm_id")
 	    
 class Places(models.Model):
-	place_id = models.CharField(max_length=100, primary_key=True)
+	place_id = models.AutoField(primary_key=True)
 	place_name = models.CharField(max_length=100)
-	place_geo_location = models.CharField(max_length=100)
-	place_description = models.CharField(max_length=1000)
-	place_reviews = models.CharField(max_length=1000)
 
 class Trip(models.Model):
 	trip_id = models.AutoField(primary_key=True)
@@ -86,8 +88,8 @@ class Trip(models.Model):
 
 
 class PlacesInTrip(models.Model):
-	trip_id = models.OneToOneField('Trip', on_delete=models.CASCADE)
-	place_id = models.OneToOneField('Places', on_delete=models.CASCADE)
+	trip_id = models.ForeignKey('Trip', on_delete=models.CASCADE)
+	place_id = models.ForeignKey('Places', on_delete=models.CASCADE)
 	place_checkin_datetime = models.DateTimeField(default=timezone.now)
 	
 	class Meta:
@@ -95,9 +97,25 @@ class PlacesInTrip(models.Model):
 
 
 class UserTrips(models.Model):
-	phone_number = models.OneToOneField('User',on_delete=models.CASCADE)
-	trip_id = models.OneToOneField('Trip',on_delete=models.CASCADE)
+	phone_number = models.ForeignKey('User',on_delete=models.CASCADE)
+	trip_id = models.ForeignKey('Trip',on_delete=models.CASCADE)
 	
 	class Meta:
 	    unique_together = ("phone_number", "trip_id")
+	    
+
+class Test(models.Model):
+	trip_id = models.ForeignKey('Trip', on_delete=models.CASCADE)
+	place_id = models.ForeignKey('Places', on_delete=models.CASCADE)
+	
+	
+	
+	class Meta:
+	    unique_together = ("trip_id", "place_id")
+	    
+	    
+'''
+from dt.models import User,Places,PlacesInTrip,Test,UserTrips,Trip
+from django.utils import timezone
+'''
 

@@ -16,15 +16,17 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 import datetime
-# Create your models here.
+
+invalid_phone_numbers=[]
 
 class User(models.Model):
-    	phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
-    	age = models.IntegerField()
-    	name = models.CharField(max_length=50)
-    	photo_url = models.URLField(max_length=100)
-    	date_creation = models.DateTimeField(default=timezone.now)
+    phone_number = models.CharField(max_length=10, primary_key=True) #Given by the user
+    age = models.IntegerField()
+    name = models.CharField(max_length=50)
+    photo_url = models.URLField(max_length=100)
+    date_creation = models.DateTimeField(default=timezone.now)
 
 
 class Group(models.Model):
@@ -60,20 +62,20 @@ class UserIsGroupMember(models.Model):
 
 
 class UserSendsGroupMessage(models.Model):
-	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-    	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
-    	class Meta:
-		unique_together = ("phone_number", "gm_id")
+    class Meta:
+	    unique_together = ("phone_number", "gm_id")
 
 
 class UserReceivesGroupMessage(models.Model):
-	phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-	gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
-	g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
-	
-	class Meta:
+    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
+    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    
+    class Meta:
 	    unique_together = ("phone_number", "gm_id")
 	
 
@@ -109,7 +111,9 @@ class UserTrips(models.Model):
 	    unique_together = ("phone_number", "trip_id")
 
 
-def create_new_user(name, age, phone_number, date_creation, photo_url=None):
+def create_new_user(name, age, phone_number, date_creation=None, photo_url=None):
+	if date_creation == None: 
+		date_creation = timezone.now
 	try:
 		User.objects.create(name=name, age=age, phone_number=phone_number, date_creation=date_creation, photo_url=photo_url)
 	
@@ -117,7 +121,9 @@ def create_new_user(name, age, phone_number, date_creation, photo_url=None):
 		raise Exception("Error during creating user")
 
 
-def create_new_group(name, date_creation, destination):
+def create_new_group(name, destination, date_creation=None):
+	if date_creation == None: 
+		date_creation = timezone.now
 	try:
 		return Group.objects.create(name=name, date_creation=date_creation, destination=destination).g_id  # create the table entry and then return g_id to the front end
 
@@ -125,10 +131,30 @@ def create_new_group(name, date_creation, destination):
 		raise Exception("Error during creating group")
 
 
+def add_members_to_group(g_id, phone_number_list):
+	try:
+		invalid_phone_numbers.clear()
+		
+		for phone_number in phone_number_list:
+			add_member_to_group(g_id, phone_number)
+		
+		if len(invalid_phone_numbers) == 0: 
+			return True
+		
+		return invalid_phone_numbers
+		
+	except:
+		raise
+		
+
 def add_member_to_group(g_id, phone_number):
 	try:
+		User.objects.get(phone_number=phone_number) 
 		UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
-
+	
+	except ObjectDoesNotExist:
+		invalid_phone_numbers.append(phone_number)
+	
 	except:
 		raise Exception("Error during adding " +str(phone_number) + " to group " + str(g_id))
 
@@ -137,8 +163,8 @@ def make_admin(g_id, phone_number):
 	''' This function will remove the existing admin to create a new admin '''
 	try:
 		AdminEntry, isNewEntry = UserIsGroupMember.objects.get_or_create(g_id=g_id, default={'phone_number': phone_number})
-
-		if(!isNewEntry):	# if an admin has already been assigned, delete the existing entry
+		
+		if(not isNewEntry):	# if an admin has already been assigned, delete the existing entry
 			tableEntry.delete()
 			UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
 
@@ -147,11 +173,11 @@ def make_admin(g_id, phone_number):
 
 
 def send_message_to_group(phone_number, g_id, video_url=None, photo_url=None, text=None):
-		''' this function automatically handles 
-			-	message creation
-			-	updating the send table
-			-	updating the receive table for all recipients in the group
-		'''
+	''' this function automatically handles 
+		-	message creation
+		-	updating the send table
+		-	updating the receive table for all recipients in the group
+	'''
 
 	if video_url == None and photo_url == None and text == None:
 		return
@@ -186,8 +212,29 @@ def get_member_coordinates(g_id):
 
 	except:
 		raise Exception("Error accessing location for group with id " + str(g_id))
+		
+
+def is_user_in_group(phone_number):
+	try:
+		UserIsGroupMember.objects.get(phone_number=phone_number)
+		return True
+	
+	except ObjectDoesNotExist:
+		return False
 
 
+def delete_group(phone_number):
+	try:
+		g_id=UserIsAdminGroup.objects.get(phone_number=phone_number)
+		
+		Group.objects.get(g_id=g_id).delete()
+		UserIsGroupMember.objects.filter(g_id=g_id).delete()
+		UserIsAdminGroup.objects.get(g_id=g_id).delete()	
+	
+	except:
+		raise Exception("Error deleting group")
+		
+		
 def update_user_location(phone_number, latitude, longitude):
 	try:
 		userEntry = UserIsGroupMember.objects.filter(phone_number=phone_number) 
@@ -196,9 +243,13 @@ def update_user_location(phone_number, latitude, longitude):
 
 	except:
 		raise Exception("Error updating location")
-
-
-
-
-
 	
+	
+	
+	
+		''' validate users - check phone number
+		
+			add users to grp - suppors list of ph nos.
+		
+		'''
+

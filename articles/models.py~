@@ -79,6 +79,10 @@ class UserReceivesGroupMessage(models.Model):
 class Places(models.Model):
 	place_id = models.AutoField(primary_key=True)
 	place_name = models.CharField(max_length=100)
+<<<<<<< HEAD
+=======
+	
+>>>>>>> ed6124ca064ec827ea9d36264bf2d5c941021326
 
 class Trip(models.Model):
 	trip_id = models.AutoField(primary_key=True)
@@ -107,9 +111,15 @@ class UserTrips(models.Model):
 class Test(models.Model):
 	trip_id = models.ForeignKey('Trip', on_delete=models.CASCADE)
 	place_id = models.ForeignKey('Places', on_delete=models.CASCADE)
-		
+	
+	
+	
 	class Meta:
 	    unique_together = ("trip_id", "place_id")
 	    
-
+	    
+'''
+from dt.models import User,Places,PlacesInTrip,Test,UserTrips,Trip
+from django.utils import timezone
+'''
 

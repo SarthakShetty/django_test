@@ -89,7 +89,7 @@ def Feature1_Module1(request):
 		print '\n\n'
 		return HttpResponse("Success")
 		
-
+<<<<<<< HEAD
 		
 
 '''
@@ -180,7 +180,7 @@ def index(request):
 			output_dict["review"]=trip_review
 			#output_dict["places"]=places
 			return HttpResponse(json.dumps(output_dict))
-
+=======
 def Feature3_create_new_user(request):
 	if request.method=="POST":
 		name, age, phone_numbsser, date_creation, photo_url = request.body.split("::")
@@ -235,3 +235,8 @@ def Feature3_update_user_location(request):
 		phone_number, latitude, longitude = request.body.split("::")						
 		update_user_location(phone_number, float(latitude), float(longitude))
 		return HttpResponse("Success")
+
+
+
+		
+>>>>>>> f44005fa2ba584d0b348f5749091f3ed3e328700

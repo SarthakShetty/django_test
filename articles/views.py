@@ -38,15 +38,18 @@ def getPlaces(data):
 
 @csrf_exempt
 def Feature2(request):
-    if request.method == "POST":
-        l = request.body.split("::")
-        location = l[0]
-        radius = l[1][0:-2]
-        json_places = roundabout.feature2(location, int(radius) * 1000)
-        print json_places
-        return HttpResponse(json.dumps(json_places))
-
-
+	if request.method=="POST":
+		l = request.body.split("::")
+		no_users=len(l)-1
+		if no_users>2:
+			location = l[0:1]+l[2:]
+		else:
+			location = l[0]
+		radius = l[1][0:-2]
+		json_places = roundabout.feature2(location,int(radius)*1000,no_users)
+		print json_places
+		return HttpResponse(json.dumps(json_places))
+	
 @csrf_exempt
 def Feature1_Module2(request):
     global final_dict

@@ -183,7 +183,7 @@ def feature2(user_location,search_radius,num_users=1):
         #display_details_of_all_places(details)
         #display_places_names(query_results)
         #display_places_details(query_results)
-'''
+
     elif(num_users>1):
         #take list of locations from front end
         locations = ["Koramangala, Bangalore","MG Road, Bangalore","Jayanagar, Bangalore"]
@@ -207,6 +207,6 @@ def feature2(user_location,search_radius,num_users=1):
         place_dictionary = put_everything_in_dictionary(coordinates_of_places,
                 points,details)	
         print(place_dictionary)
-'''
 
-feature2()
+
+

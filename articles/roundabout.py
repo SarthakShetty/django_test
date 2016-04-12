@@ -160,10 +160,8 @@ def feature2(user_location,search_radius,num_users=1):
         print("Enter 1 or more number of users.")
 
     elif(num_users == 1):
-        #user_location = 'Connaught Place, New Delhi'
-        #search_radius = int(input("Enter the radius for search(in m)"))
         query_results = google_places.nearby_search(
-                location=user_location, radius=search_radius,
+                location=user_location[0], radius=search_radius,
                 types=[types.TYPE_FOOD]
                 )
 
@@ -183,11 +181,10 @@ def feature2(user_location,search_radius,num_users=1):
         #display_details_of_all_places(details)
         #display_places_names(query_results)
         #display_places_details(query_results)
-'''
+
     elif(num_users>1):
         #take list of locations from front end
-        locations = ["Koramangala, Bangalore","MG Road, Bangalore","Jayanagar, Bangalore"]
-        points = get_coordinates_of_users(locations)
+        points = get_coordinates_of_users(user_location)
 
         #smallest circle covering all the given users
         circle = make_circle(points)
@@ -206,5 +203,5 @@ def feature2(user_location,search_radius,num_users=1):
         details = get_details_of_all_places(query_results,num_places=3)
         place_dictionary = put_everything_in_dictionary(coordinates_of_places,
                 points,details)	
-        print(place_dictionary)
-'''
+        return place_dictionary
+

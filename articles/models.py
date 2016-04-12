@@ -113,12 +113,7 @@ class UserTrips(models.Model):
 	    unique_together = ("phone_number", "trip_id")
 	    
 
-class Test(models.Model):
-	trip_id = models.ForeignKey('Trip', on_delete=models.CASCADE)
-	place_id = models.ForeignKey('Places', on_delete=models.CASCADE)
-		
-	class Meta:
-	    unique_together = ("trip_id", "place_id")
+
 	    
 
 

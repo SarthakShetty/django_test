@@ -63,7 +63,7 @@ class UserIsGroupMember(models.Model):
 
 class UserSendsGroupMessage(models.Model):
     phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('GroupMessage', on_delete=models.CASCADE)
+    gm_id = models.OneToOneField('Group_message', on_delete=models.CASCADE)
     g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
     
     class Meta:

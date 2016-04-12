@@ -96,7 +96,7 @@ def Feature1_Module1(request):
 Feature4 Views
 '''
 
-input_dict={"Op":"7","phoneNumber":"hello","tripId":5,"placeName":"mumbai"}
+#input_dict={"Op":"7","phoneNumber":"hello","tripId":5,"placeName":"mumbai"} : was used for testing
 import json
 import re
 try:
@@ -106,7 +106,8 @@ except:
 output_dict={}
 def index(request):
 	if request.method == 'GET':
-		#input_dict=json.loads(request.body);
+		
+		input_dict=json.loads(request.body);
 		op_code=input_dict["Op"]
 		if op_code=="1":
 			phone_number=input_dict["phoneNumber"]

@@ -18,23 +18,6 @@ from queries import on_start_trip, on_finish_trip, check_in, display_trip_detail
 from gen_diary import get_diary
 
 
-data = []
-full_dict = dict()
-result_dict = dict()
-final_dict = dict()
-json_str = ""
-json_dict = ""
-
-
-def getPlaces(data):
-    global full_dict
-    global result_dict
-    # print full_dict
-    for i in data:
-        if(i in full_dict.keys()):
-            result_dict[i] = full_dict[i]
-
-
 @csrf_exempt
 def Feature2(request):
 	if request.method=="POST":
@@ -51,16 +34,10 @@ def Feature2(request):
 	
 @csrf_exempt
 def Feature1_Module2(request):
-    global final_dict
-    global json_dict
-    global result_dict
 	print '--------------------POST--------------------'
     data = request.body[1:-1].split(",")
-    getPlaces(data[2:])
-    # Goes into Feature1_Module2
-    final_dict = freestyle.get_best_route(data[0], data[1], result_dict)
-    json_dict = json.dumps(final_dict, sort_keys=True,
-                           indent=4, separators=(',', ': '))
+    final_dict = freestyle.get_best_route(data[0], data[1], data[2:])# Goes into Feature1_Module2
+    json_dict = json.dumps(final_dict, sort_keys=True,indent=4, separators=(',', ': '))
     print '--------------------POST--------------------'
     print '\n\n'
     return HttpResponse('{ "route" :[' + json_dict + "\n]}")
@@ -68,8 +45,6 @@ def Feature1_Module2(request):
 
 @csrf_exempt
 def Feature1_Module1(request):
-    global full_dict
-    global json_str
     print '--------------------POST--------------------'
     data = request.body.split("::")
     print data[0], '\n', data[1]

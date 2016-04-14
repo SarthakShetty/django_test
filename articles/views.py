@@ -29,29 +29,21 @@ def Feature2(request):
 			location = l[0]
 		radius = l[1][0:-2]
 		json_places = roundabout.feature2(location,int(radius)*1000,no_users)
-		print json_places
 		return HttpResponse(json.dumps(json_places))
 	
 @csrf_exempt
 def Feature1_Module2(request):
-	print '--------------------POST--------------------'
     data = request.body[1:-1].split(",")
     final_dict = freestyle.get_best_route(data[0], data[1], data[2:])# Goes into Feature1_Module2
     json_dict = json.dumps(final_dict, sort_keys=True,indent=4, separators=(',', ': '))
-    print '--------------------POST--------------------'
-    print '\n\n'
     return HttpResponse('{ "route" :[' + json_dict + "\n]}")
 
 
 @csrf_exempt
 def Feature1_Module1(request):
-    print '--------------------POST--------------------'
     data = request.body.split("::")
-    print data[0], '\n', data[1]
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
     json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
-    print '--------------------POST--------------------'
-    print '\n\n'
     return HttpResponse(json_str)
 
 

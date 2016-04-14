@@ -70,7 +70,7 @@ def Feature1_Module2(request):
         getPlaces(data[2:])
         # print result_dict
         # Goes into Feature1_Module2
-        final_dict = freestyle.get_best_route(data[0], data[1], result_dict)
+        final_dict = run(data[0], data[1], result_dict)
         print '--------------------POST--------------------'
         print '\n\n'
         return HttpResponse(data)

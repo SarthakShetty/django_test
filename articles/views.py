@@ -80,23 +80,14 @@ def Feature1_Module2(request):
 def Feature1_Module1(request):
     global full_dict
     global json_str
-    if request.method == "GET":
-        print '--------------------GET--------------------'
-        print '--------------------GET--------------------'
-        print '\n\n'
-        return HttpResponse(json_str)  # Back to front end
-    else:
-        print '--------------------POST--------------------'
-        data = request.body.split("::")
-        print data[0], '\n', data[1]
-        # print full_dict
-        full_dict = freestyle.get_points_of_interest(
-            data[0], data[1])  # Goes into Feature1_Module1
-        json_str = json.dumps(full_dict, sort_keys=True,
-                              indent=4, separators=(',', ': '))
-        print '--------------------POST--------------------'
-        print '\n\n'
-        return HttpResponse("Success")
+    print '--------------------POST--------------------'
+    data = request.body.split("::")
+    print data[0], '\n', data[1]
+    full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
+    json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
+    print '--------------------POST--------------------'
+    print '\n\n'
+    return HttpResponse(json_str)
 
 
 '''

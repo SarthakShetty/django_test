@@ -1,0 +1,12 @@
+A. LOGIN/REGISTRATION QUERIES
+    1.  Input : phone_number, password, name, age
+        Query : create new account if phone_number not present 
+        Output : return true if account is created else return false
+
+    2.  Input : phone_number, password
+        Query : authenticate the user
+        Output : return list of user details like name, age and phone_number if successfully, else return false
+
+    3.  Input : phone_number
+        Query : get the user details
+        Output : A list containing name and age along with phone_number

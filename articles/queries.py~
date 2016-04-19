@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from dt.models import User,Places,Trip,PlacesInTrip,UserTrips
-=======
 from articles.models import User,Places,Trip,PlacesInTrip,UserTrips
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 from django.utils import timezone
 def on_start_trip(phone_number):
 		#Insert into trip table - trip_start_datetime
@@ -20,19 +16,12 @@ def on_finish_trip(trip_id,phone_number):
 		raise Exception("Couldn't update Trip table")
 def check_in(place_name,trip_id):
 	
-<<<<<<< HEAD
-		t=Places.objects.filter(place_name=place_name)[0]
-=======
 		t=Places.objects.filter(place_name=place_name)
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 		if not t:	#if the place doesnt exist,insert the place into the place table
 			p=Places.objects.create(place_name=place_name)
 			place_id=p.place_id
 		else:
-<<<<<<< HEAD
-=======
 			t=t[0]
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 			place_id=t.place_id
 		t=Trip.objects.get(trip_id=trip_id)
 		p=Places.objects.get(place_id=place_id)
@@ -49,11 +38,7 @@ def display_trip_details(trip_id):
 		d['startTime']=startTime
 		return d
 	except:
-<<<<<<< HEAD
-		raise Exception("Couldn't return trip details of the trip with id : "+trip_id)
-=======
 		raise Exception("Couldn't return trip details of the trip with id : "+ str(trip_id))
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 		
 def view_trips(phone_number):	#all the trips visited by the user
 	try:
@@ -61,21 +46,12 @@ def view_trips(phone_number):	#all the trips visited by the user
 		if c:
 			d={}
 			for i in c:
-<<<<<<< HEAD
-				t1=i.trip_id
-				t=str(t)
-				d[t]=Trip.objects.get(trip_id=t).trip_review
-			return d
-	except:
-		raise Exception("No user with : "+phone_number);
-=======
-				t=i.trip_id.trip_id
+				t=i.trip_id
 				t1 = str(t)
 				d[t1]=Trip.objects.get(trip_id=t).trip_review
 			return d
 	except:
 		raise Exception("No user with : "+str(phone_number));
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 
 def check_if_trip_exists(trip_id,phone_number):
 	try:

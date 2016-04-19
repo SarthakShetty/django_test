@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+<<<<<<< HEAD
 import dj_database_url
 
 
+=======
+>>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,7 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'articles',
+<<<<<<< HEAD
     'gunicorn',
+=======
+>>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -86,9 +92,12 @@ DATABASES = {
     }
 }
 
+<<<<<<< HEAD
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
+=======
+>>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators

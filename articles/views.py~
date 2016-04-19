@@ -6,11 +6,7 @@ from django.template import Context
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 import json
-<<<<<<< HEAD
-from models import *
-=======
 #from models import *
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 import roundabout
 import freestyle
 
@@ -65,20 +61,6 @@ except:
     print("Run with python2")
 output_dict = {}
 
-<<<<<<< HEAD
-
-def index(request):
-    if request.method == 'GET':
-
-        input_dict = json.loads(request.body)
-        op_code = input_dict["Op"]
-        if op_code == "1":
-            phone_number = input_dict["phoneNumber"]
-
-            trip_id = on_start_trip(phone_number)
-            output_dict["Op"] = op_code
-            output_dict["trip_id"] = trip_id
-=======
 @csrf_exempt
 def index(request):
 	print request.body
@@ -93,7 +75,6 @@ def index(request):
             output_dict["Op"] = op_code
             output_dict["trip_id"] = trip_id
             print output_dict
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "2":
@@ -116,34 +97,14 @@ def index(request):
 
         elif op_code == "4":
             # gen diary
-<<<<<<< HEAD
-            phone_number = input_dict["phoneNumber"]
+            phone_number = input_dict["phNo"]
             trip_id = input_dict["tripId"]
             on_finish_trip(trip_id, phone_number)
             output_dict["Op"] = op_code
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "5":
-            phone_number = input_dict["phoneNumber"]
-=======
             phone_number = input_dict["phNo"]
-            trip_id = input_dict["tripId"]
-            on_finish_trip(trip_id, phone_number)
-            # gen diary
-
-            trip_id = input_dict["tripId"]
-            places = get_places(trip_id)
-            trip_review = get_diary(places)
-
-            insert_review(trip_id, trip_review)
-            output_dict["Op"] = op_code
-            output_dict["review"] = trip_review
-            # output_dict["places"]=places
-            return HttpResponse(json.dumps(output_dict))
-
-        elif op_code == "5":
-            phone_number = input_dict["phNo"]
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
             d = {}
             d = view_trips(phone_number)
             output_dict["Op"] = op_code
@@ -152,11 +113,7 @@ def index(request):
 
         elif op_code == "6":
             trip_id = input_dict["tripId"]
-<<<<<<< HEAD
-            phone_number = input_dict["phoneNumber"]
-=======
             phone_number = input_dict["phNo"]
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
             c = check_if_trip_exists(trip_id, phone_number)
             if c:
                 d = {}

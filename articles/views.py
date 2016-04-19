@@ -6,12 +6,8 @@ from django.template import Context
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 import json
-<<<<<<< HEAD
 from models import *
-=======
-#from models import *
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
-import roundabout
+#import roundabout
 import freestyle
 
 # feature 4 imports
@@ -45,7 +41,8 @@ def Feature1_Module2(request):
 
 @csrf_exempt
 def Feature1_Module1(request):
-    data = request.body.split("::")
+    #data = request.body.split("::")
+    data = request.GET.get('data', '')
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
     json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
     return HttpResponse(json_str)
@@ -65,7 +62,6 @@ except:
     print("Run with python2")
 output_dict = {}
 
-<<<<<<< HEAD
 
 def index(request):
     if request.method == 'GET':
@@ -78,7 +74,6 @@ def index(request):
             trip_id = on_start_trip(phone_number)
             output_dict["Op"] = op_code
             output_dict["trip_id"] = trip_id
-=======
 @csrf_exempt
 def index(request):
 	print request.body
@@ -93,7 +88,7 @@ def index(request):
             output_dict["Op"] = op_code
             output_dict["trip_id"] = trip_id
             print output_dict
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
+
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "2":
@@ -116,7 +111,6 @@ def index(request):
 
         elif op_code == "4":
             # gen diary
-<<<<<<< HEAD
             phone_number = input_dict["phoneNumber"]
             trip_id = input_dict["tripId"]
             on_finish_trip(trip_id, phone_number)
@@ -125,7 +119,6 @@ def index(request):
 
         elif op_code == "5":
             phone_number = input_dict["phoneNumber"]
-=======
             phone_number = input_dict["phNo"]
             trip_id = input_dict["tripId"]
             on_finish_trip(trip_id, phone_number)
@@ -143,7 +136,6 @@ def index(request):
 
         elif op_code == "5":
             phone_number = input_dict["phNo"]
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
             d = {}
             d = view_trips(phone_number)
             output_dict["Op"] = op_code
@@ -152,11 +144,8 @@ def index(request):
 
         elif op_code == "6":
             trip_id = input_dict["tripId"]
-<<<<<<< HEAD
             phone_number = input_dict["phoneNumber"]
-=======
             phone_number = input_dict["phNo"]
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
             c = check_if_trip_exists(trip_id, phone_number)
             if c:
                 d = {}

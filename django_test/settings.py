@@ -44,10 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'articles',
-<<<<<<< HEAD
     'gunicorn',
-=======
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 ]
 
 MIDDLEWARE_CLASSES = [

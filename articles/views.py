@@ -41,8 +41,10 @@ def Feature1_Module2(request):
 
 @csrf_exempt
 def Feature1_Module1(request):
-    #data = request.body.split("::")
-    data = request.GET.get('data', '')
+    if request.method=="POST":
+        data = request.body.split("::")
+    else:
+        data = request.GET.get('data', '').split("::")
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
     json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
     return HttpResponse(json_str)

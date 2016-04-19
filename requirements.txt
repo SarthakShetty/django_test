@@ -2,4 +2,5 @@ dj-database-url==0.4.1
 Django==1.9.5
 psycopg2==2.6.1
 wheel==0.24.0
+googlemaps==2.4.2
 gunicorn==19.4.5

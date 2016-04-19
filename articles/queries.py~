@@ -46,7 +46,7 @@ def view_trips(phone_number):	#all the trips visited by the user
 		if c:
 			d={}
 			for i in c:
-				t=i.trip_id.trip_id
+				t=i.trip_id
 				t1 = str(t)
 				d[t1]=Trip.objects.get(trip_id=t).trip_review
 			return d

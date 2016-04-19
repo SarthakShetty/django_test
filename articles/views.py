@@ -6,7 +6,7 @@ from django.template import Context
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 import json
-from models import *
+#from models import *
 import roundabout
 import freestyle
 
@@ -61,18 +61,20 @@ except:
     print("Run with python2")
 output_dict = {}
 
-
+@csrf_exempt
 def index(request):
-    if request.method == 'GET':
-
-        input_dict = json.loads(request.body)
+	print request.body
+	if request.method == 'POST':
+		input_dict = json.loads(request.body)
         op_code = input_dict["Op"]
         if op_code == "1":
-            phone_number = input_dict["phoneNumber"]
+            phone_number = input_dict["phNo"]
 
             trip_id = on_start_trip(phone_number)
+            print trip_id
             output_dict["Op"] = op_code
             output_dict["trip_id"] = trip_id
+            print output_dict
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "2":
@@ -95,14 +97,23 @@ def index(request):
 
         elif op_code == "4":
             # gen diary
-            phone_number = input_dict["phoneNumber"]
+            phone_number = input_dict["phNo"]
             trip_id = input_dict["tripId"]
             on_finish_trip(trip_id, phone_number)
+            # gen diary
+
+            trip_id = input_dict["tripId"]
+            places = get_places(trip_id)
+            trip_review = get_diary(places)
+
+            insert_review(trip_id, trip_review)
             output_dict["Op"] = op_code
+            output_dict["review"] = trip_review
+            # output_dict["places"]=places
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "5":
-            phone_number = input_dict["phoneNumber"]
+            phone_number = input_dict["phNo"]
             d = {}
             d = view_trips(phone_number)
             output_dict["Op"] = op_code
@@ -111,7 +122,7 @@ def index(request):
 
         elif op_code == "6":
             trip_id = input_dict["tripId"]
-            phone_number = input_dict["phoneNumber"]
+            phone_number = input_dict["phNo"]
             c = check_if_trip_exists(trip_id, phone_number)
             if c:
                 d = {}

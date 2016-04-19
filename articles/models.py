@@ -27,11 +27,7 @@ class User(models.Model):
         max_length=10, primary_key=True)  # Given by the user
     age = models.IntegerField()
     name = models.CharField(max_length=50)
-<<<<<<< HEAD
     photo_url = models.URLField(max_length=100)
-=======
-    #photo_url = models.URLField(max_length=100)
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
     date_creation = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -119,7 +115,6 @@ class UserTrips(models.Model):
         unique_together = ("phone_number", "trip_id")
 
 
-<<<<<<< HEAD
 def create_new_user(name, age, phone_number, date_creation, photo_url=None):
     try:
         User.objects.create(name=name, age=age, phone_number=phone_number,
@@ -127,9 +122,6 @@ def create_new_user(name, age, phone_number, date_creation, photo_url=None):
 
     except:
         raise Exception("Error during creating user")
-=======
-
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 
 
 def create_new_group(name, date_creation, destination):
@@ -154,11 +146,7 @@ def create_new_user(name, age, phone_number, date_creation=None, photo_url=None)
         date_creation = timezone.now
     try:
         User.objects.create(name=name, age=age, phone_number=phone_number,
-<<<<<<< HEAD
                             date_creation=date_creation, photo_url=photo_url)
-=======
-                            date_creation=date_creation)
->>>>>>> a2d4e0f99fbc4825851153d6ebecac8be71548ba
 
     except:
         raise Exception("Error during creating user")
@@ -222,9 +210,9 @@ def make_admin(g_id, phone_number):
 
 def send_message_to_group(phone_number, g_id, video_url=None, photo_url=None, text=None):
     ''' this function automatically handles 
-            -	message creation
-            -	updating the send table
-            -	updating the receive table for all recipients in the group
+            -   message creation
+            -   updating the send table
+            -   updating the receive table for all recipients in the group
     '''
 
     if video_url == None and photo_url == None and text == None:
@@ -297,7 +285,7 @@ def update_user_location(phone_number, latitude, longitude):
         raise Exception("Error updating location")
 
         ''' validate users - check phone number
-		
-			add users to grp - suppors list of ph nos.
-		
-		'''
+        
+            add users to grp - suppors list of ph nos.
+        
+        '''

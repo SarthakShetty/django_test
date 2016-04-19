@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^f1m1', 'articles.views.Feature1_Module1'),
     url(r'^f2', 'articles.views.Feature2'),
     url(r'^f4', 'articles.views.index'),
+    url(r'$', 'articles.views.Homepage'),
    
     #url(r'^admin/', admin.site.urls),
 ]

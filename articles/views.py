@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import *
 from django.template.loader import get_template
 from django.core import serializers
 from django.template import Context
@@ -9,6 +9,7 @@ import json
 from models import *
 import roundabout
 import freestyle
+import datetime
 
 # feature 4 imports
 from random import shuffle
@@ -17,6 +18,13 @@ from django.utils import timezone
 from queries import on_start_trip, on_finish_trip, check_in, display_trip_details, view_trips, check_if_trip_exists, insert_review, get_places
 from gen_diary import get_diary
 
+
+@csrf_exempt
+def Homepage(request):
+    now = datetime.datetime.now()
+    html = "<!doctype html><html><body>It is now %s.</body></html>" % now
+
+    return HttpResponse(html)
 
 @csrf_exempt
 def Feature2(request):
@@ -46,8 +54,8 @@ def Feature1_Module1(request):
     else:
         data = request.GET.get('data', '').split("::")
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
-    json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
-    return HttpResponse(json_str)
+    json_str = json.dumps(full_dict, sort_keys=True, indent=4)
+    return HttpResponse(json_str, content_type="application/json")
 
 
 '''

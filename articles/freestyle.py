@@ -120,7 +120,7 @@ def get_best_route(source, dest, waypoints=None):
 
     waypoint_latlng_list = []
 
-    # Extracy coordinates of each waypoint from the waypoints dictionary
+    # Extract coordinates of each waypoint from the waypoints dictionary
     for waypoint in waypoints.keys():
         waypoint_latlng_list.append(waypoints[waypoint]['geometry']['location'])
 

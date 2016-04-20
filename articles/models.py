@@ -23,11 +23,11 @@ invalid_phone_numbers = []
 
 
 class User(models.Model):
-    phone_number = models.CharField(
-        max_length=10, primary_key=True)  # Given by the user
+    password = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
     age = models.IntegerField()
     name = models.CharField(max_length=50)
-    photo_url = models.URLField(max_length=100)
+    #photo_url = models.URLField(max_length=100)
     date_creation = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -115,13 +115,7 @@ class UserTrips(models.Model):
         unique_together = ("phone_number", "trip_id")
 
 
-def create_new_user(name, age, phone_number, date_creation, photo_url=None):
-    try:
-        User.objects.create(name=name, age=age, phone_number=phone_number,
-                            date_creation=date_creation, photo_url=photo_url)
 
-    except:
-        raise Exception("Error during creating user")
 
 
 def create_new_group(name, date_creation, destination):
@@ -141,14 +135,16 @@ def add_member_to_group(g_id, phone_number):
         raise Exception("Error during adding member to group")
 
 
-def create_new_user(name, age, phone_number, date_creation=None, photo_url=None):
+def create_new_user(name, age, phone_number,password, date_creation=None, photo_url=None):
     if date_creation == None:
-        date_creation = timezone.now
+        date_creation = timezone.now()
     try:
-        User.objects.create(name=name, age=age, phone_number=phone_number,
-                            date_creation=date_creation, photo_url=photo_url)
+        print name,age,phone_number,password,date_creation
+        User.objects.create(name=name, age=age, phone_number=phone_number,password=password,
+                            date_creation=date_creation)
 
     except:
+        print("Error:", name, age, phone_number, password)
         raise Exception("Error during creating user")
 
 
@@ -244,8 +240,8 @@ def get_member_coordinates(g_id):
     try:
         L = []
         for userEntry in UserIsGroupMember.objects.filter(g_id=g_id):
-            L.append((User.objects.get(phone_number=userEntry.phone_number).name,
-                      {'latitude': userEntry.latitude, 'longitude': userEntry.longitude}))
+            L.append(
+                      {'name':User.objects.get(phone_number=userEntry.phone_number).name, 'latitude': userEntry.latitude, 'longitude': userEntry.longitude})
 
         return L
 
@@ -284,8 +280,8 @@ def update_user_location(phone_number, latitude, longitude):
     except:
         raise Exception("Error updating location")
 
-        ''' validate users - check phone number
+        ''' 
+            validate users - check phone number
         
             add users to grp - suppors list of ph nos.
-        
         '''

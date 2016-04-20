@@ -56,6 +56,39 @@ def freestyle_getpoints(request):
 
     return HttpResponse(html)
 
+@csrf_exempt
+def login(request):
+    input_dict = json.loads(request.body)
+    op = int(input_dict["op"])
+    print input_dict
+    if op==0:
+        name = input_dict["name"]
+        pwd = input_dict["password"]
+        phone = input_dict["phone"]
+        age = input_dict["age"]
+        try:
+            print name,age,pwd,phone
+            functions.Feature3_create_new_user(name,int(age),phone,pwd)
+        except:
+            return HttpResponse("Unknown error.")
+        return HttpResponse("User created")
+    elif op==1:
+        phone = input_dict["phone"]
+        pwd = input_dict["password"]
+        if functions.sign_in(phone,pwd):
+            return HttpResponse("success")
+        else:
+            return HttpResponse("Incorrect password")
+        
+        
+'''     
+def group_activity(request):
+    input_dict = json.loads(request.body)
+    op = int(input_dict["op"])
+    if op==0:
+        
+''' 
+
 ''' ============ Feature 1 ============ '''
 
 @csrf_exempt
@@ -185,68 +218,3 @@ def index(request):
 
 ''' ============ Feature 3 ============ '''
 
-def Feature3_create_new_user(request):
-    if request.method == "POST":
-        name, age, phone_numbsser, date_creation, photo_url = request.body.split(
-            "::")
-        create_new_user(name, int(age), phone_number, date_creation, photo_url)
-        return HttpResponse("Success")
-
-
-def Feature3_create_new_group(request):
-    if request.method == "POST":
-        name, destination, date_creation = request.body.split("::")
-        g_id = create_new_group(name, destination, date_creation)
-        return HttpResponse(g_id)
-
-
-def Feature3_add_members_to_group(request):
-    if request.method == "POST":
-        g_id, phone_number_list = request.body.split("::")
-        invalid_phone_numbers = add_members_to_group(
-            int(g_id), phone_number_list)
-        return HttpResponse(invalid_phone_numbers)
-
-
-def Feature3_make_admin(request):
-    if request.method == "POST":
-        g_id, phone_number = request.body.split("::")
-        make_admin(int(g_id), phone_number)
-        return HttpResponse("Success")
-
-
-def Feature3_send_message_to_group(request):
-    if request.method == "POST":
-        phone_number, g_id, video_url, photo_url, text = request.body.split(
-            "::")
-        send_message_to_group(phone_number, int(
-            g_id), video_url, photo_url, text)
-        return HttpResponse("Success")
-
-
-def Feature3_get_member_coordinates(request):
-    if request.method == "POST":
-        g_id = request.body
-        L = get_member_coordinates(int(g_id))
-        return HttpResponse(L)
-
-
-def Feature3_is_user_in_group(request):
-    if request.method == "POST":
-        phone_number = request.body
-        status = is_user_in_group(phone_number)
-        return HttpResponse(status)
-
-
-def Feature3_delete_group(request):
-    if request.method == "POST":
-        phone_number = request.body
-        delete_group(phone_number)
-        return HttpResponse("Success")
-
-
-def Feature3_update_user_location(request):
-    if request.method == "POST":
-        phone_number, latitude, longitude = request.body.split("::")
-        update_user_location(phone_number, float(latitude), float(longitude))
-        return HttpResponse("Success")

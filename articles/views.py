@@ -153,32 +153,35 @@ def index(request):
             # output_dict["places"]=places
             return HttpResponse(json.dumps(output_dict))
 
-
+@csrf_exempt
 def login(request):
 	input_dict = json.loads(request.body)
 	op = int(input_dict["op"])
+	print input_dict
 	if op==0:
 		name = input_dict["name"]
 		pwd = input_dict["password"]
 		phone = input_dict["phone"]
 		age = input_dict["age"]
 		try:
-			functions.Feature3_create_new_user(name,int(age),phone)
-		except IntegrityError:
-			return HttpResponse("There is an account associated with this number.")
+			print name,age,pwd,phone
+			functions.Feature3_create_new_user(name,int(age),phone,pwd)
 		except:
 			return HttpResponse("Unknown error.")
+		return HttpResponse("User created")
 	elif op==1:
 		phone = input_dict["phone"]
 		pwd = input_dict["password"]
 		if functions.sign_in(phone,pwd):
-			return HttpsResponse("success")
+			return HttpResponse("success")
+		else:
+			return HttpResponse("Incorrect password")
 		
 		
-		
+'''		
 def group_activity(request):
 	input_dict = json.loads(request.body)
 	op = int(input_dict["op"])
 	if op==0:
 		
-		
+'''		

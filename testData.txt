@@ -1,0 +1,14 @@
+{
+	"op": "0",
+	"name": "Sarthak",
+	"phone": "9845382348",
+	"age": "21",
+	"password": "password"
+}
+
+{
+	"op": "1",
+	"phone": "9845382348",
+	"password": "password"
+}
+

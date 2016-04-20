@@ -135,14 +135,16 @@ def add_member_to_group(g_id, phone_number):
         raise Exception("Error during adding member to group")
 
 
-def create_new_user(name, age, phone_number, date_creation=None, photo_url=None):
+def create_new_user(name, age, phone_number,password, date_creation=None, photo_url=None):
     if date_creation == None:
-        date_creation = timezone.now
+        date_creation = timezone.now()
     try:
-        User.objects.create(name=name, age=age, phone_number=phone_number,
+    	print name,age,phone_number,password,date_creation
+        User.objects.create(name=name, age=age, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 
     except:
+    	print name,age,phone_number,password,"why m"
         raise Exception("Error during creating user")
 
 

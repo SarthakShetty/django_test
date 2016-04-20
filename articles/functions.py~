@@ -1,10 +1,9 @@
 from models import *
 def Feature3_create_new_user(name, age, phone_number, date_creation=None, photo_url=None):
-	create_new_user(name, int(age), phone_number, date_creation, photo_url)
-	return HttpResponse("Success")
+	create_new_user(name, int(age), phone_number,password)
 
 def sign_in(phone_number,password):
-	x=User.objects.get(phone_number=phone_number):
+	x=User.objects.get(phone_number=phone_number)
 	if x:
 		if password==x.password:
 			return True
@@ -19,7 +18,7 @@ def Feature3_create_new_group(name, destination, date_creation):
 
 def Feature3_add_members_to_group(g_id, phone_number_list):
 	invalid_phone_numbers = add_members_to_group(int(g_id), phone_number_list)
-    return HttpResponse(invalid_phone_numbers)
+	return HttpResponse(invalid_phone_numbers)
 
 
 def Feature3_make_admin(g_id, phone_number ):
@@ -29,7 +28,7 @@ def Feature3_make_admin(g_id, phone_number ):
 
 def Feature3_send_message_to_group(phone_number, g_id, video_url, photo_url, text):
 	send_message_to_group(phone_number, int(g_id), video_url, photo_url, text)
-    return HttpResponse("Success")
+	return HttpResponse("Success")
 
 
 def Feature3_get_member_coordinates(g_id):

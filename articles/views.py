@@ -61,12 +61,12 @@ def freestyle_getpoints(request):
 @csrf_exempt
 def Feature1_Module1(request):
     if request.method=="GET":
-        data = request.GET["data"].split("::")
+        data = (request.GET["source"], request.GET["dest"])
     else:
         data = request.body.split("::")
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
-    json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
-    return HttpResponse(json_str)
+    return HttpResponse(json.dumps(full_dict, indent=4), content_type="application/json")
+
 
 @csrf_exempt
 def Feature1_Module2(request):

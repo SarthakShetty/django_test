@@ -23,8 +23,8 @@ invalid_phone_numbers = []
 
 
 class User(models.Model):
-    phone_number = models.CharField(
-        max_length=10, primary_key=True)  # Given by the user
+    password = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
     age = models.IntegerField()
     name = models.CharField(max_length=50)
     #photo_url = models.URLField(max_length=100)
@@ -238,8 +238,8 @@ def get_member_coordinates(g_id):
     try:
         L = []
         for userEntry in UserIsGroupMember.objects.filter(g_id=g_id):
-            L.append((User.objects.get(phone_number=userEntry.phone_number).name,
-                      {'latitude': userEntry.latitude, 'longitude': userEntry.longitude}))
+            L.append(
+                      {'name':User.objects.get(phone_number=userEntry.phone_number).name, 'latitude': userEntry.latitude, 'longitude': userEntry.longitude})
 
         return L
 
@@ -278,8 +278,8 @@ def update_user_location(phone_number, latitude, longitude):
     except:
         raise Exception("Error updating location")
 
-        ''' validate users - check phone number
+        ''' 
+        	validate users - check phone number
 		
 			add users to grp - suppors list of ph nos.
-		
 		'''

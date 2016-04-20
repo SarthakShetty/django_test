@@ -1,44 +1,70 @@
-from django.shortcuts import render
-from django.http import *
-from django.template.loader import get_template
 from django.core import serializers
+from django.http import *
+from django.shortcuts import render
 from django.template import Context
 from django.template import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-import json
-from models import *
-import roundabout
-import freestyle
-import datetime
-
-# feature 4 imports
-from random import shuffle
-from random import randrange
+from django.template.loader import get_template
 from django.utils import timezone
-from queries import on_start_trip, on_finish_trip, check_in, display_trip_details, view_trips, check_if_trip_exists, insert_review, get_places
+from django.views.decorators.csrf import csrf_exempt
+from models import *
+from random import randrange
+from random import shuffle
 from gen_diary import get_diary
+from queries import (on_start_trip, on_finish_trip, 
+        check_in, display_trip_details, view_trips, 
+        check_if_trip_exists, insert_review, get_places)
+import datetime
+import freestyle
+import json
+import re
+import roundabout
+try:
+    import urllib2
+except:
+    print("Run with python2")
 
+''' ============ Non-feature related views ============ '''
 
 @csrf_exempt
-def Homepage(request):
+def homepage(request):
     now = datetime.datetime.now()
-    html = "<!doctype html><html><body>It is now %s.</body></html>" % now
+    html = """<!doctype html><html><body><h3>Welcome to EGM's backend Django server! <br><br>It is now %s. </h3> """  % now + """
+
+<h4> Views for feature 1 (that should be implemented but haven't) <h4>
+<pre>
+@csrf_exempt
+def freestyle_getroute(request):
+    ''' Get source, destination, and some points of interest. Return an optimal route json for rendering at the front end '''
+    exec("source  = request.%s['source']" %request.method)
+    exec("dest    = request.%s['dest']" %request.method)
+    exec("json_waypoints    = json.loads(request.%s['json_waypoints'])" %request.method)
+    #json_waypoints = request.body
+    optimal_route = freestyle.get_best_route(source, dest, json_waypoints)
+
+    return HttpResponse(json.dumps(optimal_route, indent=4), content_type="application/json")
+
+@csrf_exempt
+def freestyle_getpoints(request):
+    ''' Get source and destination from user, and return points of interest '''
+    exec("source  = request.%s['source']" %request.method)
+    exec("dest    = request.%s['dest']" %request.method)
+
+    points_of_interest = freestyle.get_points_of_interest(source, dest)
+    return HttpResponse(json.dumps(points_of_interest, indent=4))
+    </pre>
+</body></html>"""
 
     return HttpResponse(html)
 
+''' ============ Feature 1 ============ '''
+
 @csrf_exempt
-def Feature2(request):
-	if request.method=="POST":
-		l = request.body.split("::")
-		no_users=len(l)-1
-		if no_users>2:
-			location = l[0:1]+l[2:]
-		else:
-			location = l[0]
-		radius = l[1][0:-2]
-		json_places = roundabout.feature2(location,int(radius)*1000,no_users)
-		return HttpResponse(json.dumps(json_places))
-	
+def Feature1_Module1(request):
+    data = request.body.split("::")
+    full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
+    json_str = json.dumps(full_dict, sort_keys=True,indent=4, separators=(',', ': '))
+    return HttpResponse(json_str)
+
 @csrf_exempt
 def Feature1_Module2(request):
     data = request.body[1:-1].split(",")
@@ -46,49 +72,29 @@ def Feature1_Module2(request):
     json_dict = json.dumps(final_dict, sort_keys=True,indent=4, separators=(',', ': '))
     return HttpResponse('{ "route" :[' + json_dict + "\n]}")
 
+''' ============ Feature 2 ============ '''
 
 @csrf_exempt
-def Feature1_Module1(request):
+def Feature2(request):
     if request.method=="POST":
-        data = request.body.split("::")
-    else:
-        data = request.GET.get('data', '').split("::")
-    full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
-    json_str = json.dumps(full_dict, sort_keys=True, indent=4)
-    return HttpResponse(json_str, content_type="application/json")
+        l = request.body.split("::")
+        no_users=len(l)-1
+        if no_users>2:
+            location = l[0:1]+l[2:]
+        else:
+            location = l[0]
+        radius = l[1][0:-2]
+        json_places = roundabout.feature2(location,int(radius)*1000,no_users)
+        return HttpResponse(json.dumps(json_places))
+    
+''' ============ Feature 4 ============ '''
 
-
-'''
-Feature4 Views
-'''
-
-# input_dict={"Op":"7","phoneNumber":"hello","tripId":5,"placeName":"mumbai"}
-# : was used for testing
-import json
-import re
-try:
-    import urllib2
-except:
-    print("Run with python2")
-output_dict = {}
-
-
-def index(request):
-    if request.method == 'GET':
-
-        input_dict = json.loads(request.body)
-        op_code = input_dict["Op"]
-        if op_code == "1":
-            phone_number = input_dict["phoneNumber"]
-
-            trip_id = on_start_trip(phone_number)
-            output_dict["Op"] = op_code
-            output_dict["trip_id"] = trip_id
 @csrf_exempt
 def index(request):
-	print request.body
-	if request.method == 'POST':
-		input_dict = json.loads(request.body)
+    output_dict = {}
+    print request.body
+    if request.method == 'POST':
+        input_dict = json.loads(request.body)
         op_code = input_dict["Op"]
         if op_code == "1":
             phone_number = input_dict["phNo"]
@@ -98,7 +104,6 @@ def index(request):
             output_dict["Op"] = op_code
             output_dict["trip_id"] = trip_id
             print output_dict
-
             return HttpResponse(json.dumps(output_dict))
 
         elif op_code == "2":
@@ -121,14 +126,6 @@ def index(request):
 
         elif op_code == "4":
             # gen diary
-            phone_number = input_dict["phoneNumber"]
-            trip_id = input_dict["tripId"]
-            on_finish_trip(trip_id, phone_number)
-            output_dict["Op"] = op_code
-            return HttpResponse(json.dumps(output_dict))
-
-        elif op_code == "5":
-            phone_number = input_dict["phoneNumber"]
             phone_number = input_dict["phNo"]
             trip_id = input_dict["tripId"]
             on_finish_trip(trip_id, phone_number)
@@ -154,7 +151,6 @@ def index(request):
 
         elif op_code == "6":
             trip_id = input_dict["tripId"]
-            phone_number = input_dict["phoneNumber"]
             phone_number = input_dict["phNo"]
             c = check_if_trip_exists(trip_id, phone_number)
             if c:
@@ -184,6 +180,7 @@ def index(request):
             # output_dict["places"]=places
             return HttpResponse(json.dumps(output_dict))
 
+''' ============ Feature 3 ============ '''
 
 def Feature3_create_new_user(request):
     if request.method == "POST":

@@ -28,7 +28,7 @@ except:
 @csrf_exempt
 def homepage(request):
     now = datetime.datetime.now()
-    html = """<!doctype html><html><body><h3>Welcome to EGM's backend Django server! <br><br>It is now %s. </h3> """  % now + """
+    html = """<!doctype html><html><body style="background-image:url('https://impythonist.files.wordpress.com/2015/06/1666323.png'); background-size:cover; background-repeat: no-repeat;"><h3>Welcome to EGM's backend Django server! <br><br>It is now %s. </h3> """  % now + """
 
 <h4> Views for feature 1 (that should be implemented but haven't) <h4>
 <pre>
@@ -98,7 +98,7 @@ def Feature1_Module1(request):
     else:
         data = request.body.split("::")
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
-    return HttpResponse(json.dumps(full_dict, indent=4), content_type="application/json")
+    return HttpResponse(full_dict.keys(), (json.dumps(full_dict, indent=4)), content_type="application/json")
 
 
 @csrf_exempt

@@ -86,7 +86,7 @@ def get_points_of_interest(source, dest):
     
     # Send a places query to find points of interest with the given location and radius biases
     # Vary the biasing depending on the distance b/w source and destination
-    places_json_result = gmaps.places("tourism, restaurants in " + (place_bias[0].split()[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]), location=list(center), radius=radius)
+    places_json_result = gmaps.places("tourism, restaurants in " + (place_bias[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]), location=list(center), radius=radius)
     # Status check
     if places_json_result["status"] != "OK":
         return {}

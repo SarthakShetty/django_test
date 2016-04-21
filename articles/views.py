@@ -98,7 +98,7 @@ def Feature1_Module1(request):
     else:
         data = request.body.split("::")
     full_dict = freestyle.get_points_of_interest(data[0], data[1])  # Goes into Feature1_Module1
-    return HttpResponse(full_dict.keys(), (json.dumps(full_dict, indent=4)), content_type="application/json")
+    return HttpResponse((full_dict.keys(), json.dumps(full_dict, indent=4)), content_type="application/json")
 
 
 @csrf_exempt

@@ -72,7 +72,6 @@ def get_points_of_interest(source, dest):
     bounds_northeast, bounds_southwest = Coordinates(*OrderedDict(bounds["northeast"]).values()), Coordinates(*OrderedDict(bounds["southwest"]).values())
     center = get_midpoint(bounds_northeast, bounds_southwest) # get the center point coordinate between the bounding-box coordinates
     radius = get_distance(center, bounds_northeast) # get the length of the half-diagonal between the two bounding-box coordinates
-
 	# Send a reverse geocoding query for the center coordinate. This is needed to bias the places query results. The query will return only the English readable administrative level 1 address (in other words, the name of the state or union territory in which the coordinates reside)
     place_bias_json_result = json.loads(urllib2.urlopen(URL_rev_geo.replace('__LATLNG__', googlemaps.convert.latlng(list(center)))).read()) 
 
@@ -83,11 +82,11 @@ def get_points_of_interest(source, dest):
     # Extract the state/union territory name
     place_bias = [place['long_name'] for place in place_bias_json_result['results'][0]['address_components']]
 
-    print(radius, place_bias, (place_bias[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]))
+    print(radius, place_bias, (place_bias[0] if radius < 30 else place_bias[1] if radius < 100 else place_bias[2]))
     
     # Send a places query to find points of interest with the given location and radius biases
     # Vary the biasing depending on the distance b/w source and destination
-    places_json_result = gmaps.places("tourism, restaurants in " + (place_bias[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]), location=list(center), radius=radius)
+    places_json_result = gmaps.places("tourism, restaurants in " + (place_bias[0].split()[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]), location=list(center), radius=radius)
     # Status check
     if places_json_result["status"] != "OK":
         return {}
@@ -101,7 +100,7 @@ def get_points_of_interest(source, dest):
         if 'tour' in result['name'].lower() or 'travels' in result['name'].lower(): 
             continue
         try:
-            if result['rating'] >= 4.0:
+            if result['rating'] >= 3.0:
                 print(result['name'])
                 points_of_interest[result['name']] = result
         except: 

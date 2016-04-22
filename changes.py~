@@ -2,7 +2,7 @@ def group_activity(request):
 	input_dict = json.loads(request.body)
 	op = int(input_dict["op"])
 	#0 - create group
-	##TODO
+	## TODO -polling if already part of group in this intent
 	#1 - view members
 	#2 - group chat
 	#3 - exit group
@@ -34,7 +34,7 @@ def group_activity(request):
 		try:
 			g_id = UserIsGroupMember.objects.get(phone_number=user1).g_id.g_id
 			group = Group.objects.get(g_id=g_id)
-			Group.objects.get(g_id=group.g_id).delete()
+			group.delete()
 			return HttpResponse("Success")
 
 			

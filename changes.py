@@ -34,7 +34,7 @@ def group_activity(request):
 		try:
 			g_id = UserIsGroupMember.objects.get(phone_number=user1).g_id.g_id
 			group = Group.objects.get(g_id=g_id)
-			Group.objects.get(g_id=group.g_id).delete()
+			group.delete()
 			return HttpResponse("Success")
 
 			

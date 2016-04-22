@@ -2,6 +2,7 @@ def group_activity(request):
 	input_dict = json.loads(request.body)
 	op = int(input_dict["op"])
 	#0 - create group
+	## TODO -polling if already part of group in this intent
 	#1 - view members
 	#2 - group chat
 	#3 - exit group

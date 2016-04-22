@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 from django.utils.encoding import python_2_unicode_compatible
+from django.db import IntegrityError
 
 invalid_phone_numbers = []
 
@@ -27,6 +28,7 @@ class User(models.Model):
     phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
     age = models.IntegerField()
     name = models.CharField(max_length=50)
+    session_id = models.IntegerField(default=0)
     #photo_url = models.URLField(max_length=100)
     date_creation = models.DateTimeField(default=timezone.now)
 
@@ -51,16 +53,16 @@ class GroupMessage(models.Model):
 
 
 class UserIsAdminGroup(models.Model):
-    g_id = models.OneToOneField('group', on_delete=models.CASCADE)
-    phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("g_id", "phone_number")
 
 
 class UserIsGroupMember(models.Model):
-    g_id = models.OneToOneField('group', on_delete=models.CASCADE)
-    phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
 
@@ -69,18 +71,18 @@ class UserIsGroupMember(models.Model):
 
 
 class UserSendsGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
+    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("phone_number", "gm_id")
 
 
 class UserReceivesGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
+    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("phone_number", "gm_id")
@@ -143,9 +145,8 @@ def create_new_user(name, age, phone_number,password, date_creation=None, photo_
         User.objects.create(name=name, age=age, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 
-    except:
-    	print name,age,phone_number,password,"why m"
-        raise Exception("Error during creating user")
+    except IntegrityError:        
+    	raise IntegrityError("Error during creating user")
 
 
 def create_new_group(name, destination, date_creation=None):

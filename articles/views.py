@@ -5,6 +5,7 @@ from django.core import serializers
 from django.template import Context
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 import json
 #from models import *
 import roundabout
@@ -164,24 +165,36 @@ def login(request):
 		phone = input_dict["phone"]
 		age = input_dict["age"]
 		try:
-			print name,age,pwd,phone
 			functions.Feature3_create_new_user(name,int(age),phone,pwd)
-		except:
-			return HttpResponse("Unknown error.")
+		except IntegrityError:
+			return HttpResponse("User Already Exists")
 		return HttpResponse("User created")
 	elif op==1:
 		phone = input_dict["phone"]
 		pwd = input_dict["password"]
-		if functions.sign_in(phone,pwd):
-			return HttpResponse("success")
-		else:
+		status = functions.sign_in(phone,pwd)
+		if status==1:
+			return HttpResponse(status)
+		elif status==2:
+			return HttpResponse("User does not exist")
+		elif status==3:
 			return HttpResponse("Incorrect password")
+		elif status==4:
+			return HttpResponse("Already Logged In")
+	elif op==2:
+		phone = input_dict["phone"]
+		try:
+			response = functions.sign_out(phone)
+			return HttpResponse(response)
+		except:
+			print("Unknown Error")
+		return HttpResponse("Error")
 		
 		
-'''		
+'''
 def group_activity(request):
 	input_dict = json.loads(request.body)
 	op = int(input_dict["op"])
 	if op==0:
-		
-'''		
+'''				
+

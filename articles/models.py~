@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 from django.utils.encoding import python_2_unicode_compatible
+from django.db import IntegrityError
 
 invalid_phone_numbers = []
 
@@ -27,6 +28,7 @@ class User(models.Model):
     phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
     age = models.IntegerField()
     name = models.CharField(max_length=50)
+    session_id = models.IntegerField(default=0)
     #photo_url = models.URLField(max_length=100)
     date_creation = models.DateTimeField(default=timezone.now)
 
@@ -139,13 +141,12 @@ def create_new_user(name, age, phone_number,password, date_creation=None, photo_
     if date_creation == None:
         date_creation = timezone.now()
     try:
-    	print name,age,phone_number,password,
+    	print name,age,phone_number,password,date_creation
         User.objects.create(name=name, age=age, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 
-    except:
-    	print name,age,phone_number,password,"why m"
-        raise Exception("Error during creating user")
+    except IntegrityError:        
+    	raise IntegrityError("Error during creating user")
 
 
 def create_new_group(name, destination, date_creation=None):

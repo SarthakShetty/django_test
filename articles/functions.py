@@ -3,13 +3,28 @@ def Feature3_create_new_user(name, age, phone_number,password, date_creation=Non
 	create_new_user(name, int(age), phone_number,password)
 
 def sign_in(phone_number,password):
-	x=User.objects.get(phone_number=phone_number)
+	try:
+		x=User.objects.get(phone_number=phone_number)
+	except:
+		return 2
 	if x:
 		if password==x.password:
-			return True
+			if x.session_id ==1:
+				return 4
+			x.session_id =1
+			x.save()
+			return x.session_id
 		else:
-			return False
-	return False	
+			return x.session_id
+	return 3
+
+def sign_out(phone_number):
+	x=User.objects.get(phone_number=phone_number)
+	if x.session_id==1:
+		x.session_id=0		
+		x.save()
+		return "Signed Out"
+	return "Need to be signed in to sign out."
 
 def Feature3_create_new_group(name, destination, date_creation):
 	g_id = create_new_group(name, destination, date_creation)

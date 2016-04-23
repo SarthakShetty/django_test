@@ -217,6 +217,7 @@ def group_activity(request):
     # 2 - group chat
     # 3 - exit group
     # 4 - check if group
+    # 5 - map
     if op == 0:
         phone = input_dict["phone"]
         gname = input_dict["gname"]
@@ -266,6 +267,7 @@ def group_activity(request):
             json_response["lngs"] = lngs
             json_response["status"] = 1
             return HttpResponse(json.dumps(json_response))
+            ##TODO : Parse on Front End, Display Route to Destination, Add Available Markers(Check for 0.0)
             
 
     if op == 1:
@@ -285,6 +287,29 @@ def group_activity(request):
         print json_response
         return HttpResponse(json.dumps(json_response))
     # if op==2:
+    if op==5:
+    	phone = input_dict["phone"]
+    	lat = input_dict["lat"]
+    	lng = input_dict["lng"]
+    	json_response={}
+        user = User.objects.get(phone_number=phone)
+        member = UserIsGroupMember.objects.get(phone_number=user)
+        member.latitude = lat
+        member.longitude = lng
+        member.save()
+        g_id = member.g_id.g_id
+        group = Group.objects.get(g_id=g_id)
+        members = UserIsGroupMember.objects.filter(g_id=group)
+        lats=[];lngs=[]
+        for member in members:
+            lats.append(member.latitude)
+            lngs.append(member.longitude)
+        json_response["member_lats"]= ";".join(lats)
+        json_response["member_lngs"]= ";".join(lngs)
+        #TODO : Parse and display markers on front end
+            
+        
+        
 
     if op == 3:
     	phone = input_dict["phone"]

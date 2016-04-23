@@ -291,6 +291,8 @@ def group_activity(request):
     	phone = input_dict["phone"]
     	lat = input_dict["lat"]
     	lng = input_dict["lng"]
+    	phones = []
+        names = []
     	json_response={}
         user = User.objects.get(phone_number=phone)
         member = UserIsGroupMember.objects.get(phone_number=user)
@@ -304,8 +306,11 @@ def group_activity(request):
         for member in members:
             lats.append(member.latitude)
             lngs.append(member.longitude)
+            phones.append(member.phone_number.phone_number)
+            names.append(member.phone_number.name)
         json_response["member_lats"]= ";".join(lats)
         json_response["member_lngs"]= ";".join(lngs)
+        json_response["member_names"]= ";".join(names)
         #TODO : Parse and display markers on front end
             
         

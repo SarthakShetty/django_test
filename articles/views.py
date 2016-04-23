@@ -49,6 +49,7 @@ def Feature1_Module2(request):
 @csrf_exempt
 def Feature1_Module1(request):
     data = request.body.split("::")
+    print data
     full_dict = freestyle.get_points_of_interest(
         data[0], data[1])  # Goes into Feature1_Module1
     json_str = json.dumps(full_dict, sort_keys=True,
@@ -182,13 +183,17 @@ def login(request):
         pwd = input_dict["password"]
         status = functions.sign_in(phone, pwd)
         if status == 1:
-            return HttpResponse(status)
+            n = User.objects.get(phone_number=phone).name
+            print "1:"+n
+            return HttpResponse("1:"+n)
         elif status == 2:
             return HttpResponse("User does not exist")
         elif status == 3:
             return HttpResponse("Incorrect password")
         elif status == 4:
             return HttpResponse("Already Logged In")
+        else:
+        	return HttpResponse("Error")
     elif op == 2:
         phone = input_dict["phone"]
         try:
@@ -198,15 +203,19 @@ def login(request):
             print("Unknown Error")
         return HttpResponse("Error")
 
+
 @csrf_exempt
 def group_activity(request):
+    print request.body
     input_dict = json.loads(request.body)
     op = int(input_dict["op"])
+    print op, op == 4
     # 0 - create group
     # TODO -polling if already part of group in this intent
     # 1 - view members
     # 2 - group chat
     # 3 - exit group
+    # 4 - check if group
     if op == 0:
         phone = input_dict["phone"]
         gname = input_dict["gname"]
@@ -218,9 +227,39 @@ def group_activity(request):
         UserIsGroupMember.objects.create(g_id=group, phone_number=user)
         UserIsAdminGroup.objects.create(g_id=group, phone_number=user)
         for member in members:
-			user = User.objects.get(phone_number=member)
-			UserIsGroupMember.objects.create(g_id=group, phone_number=user)
-    	return HttpResponse("Success")
+            print member
+            user = User.objects.get(phone_number=member)
+            print type(user)
+            UserIsGroupMember.objects.create(g_id=group, phone_number=user)
+    	    return HttpResponse("Success")
+    if op == 4:
+        print "came here"
+        phone = input_dict["phone"]
+        lat = input_dict["lat"]
+        lng = input_dict["lng"]
+        user = User.objects.get(phone_number=phone)
+        json_response = {}
+        member = UserIsGroupMember.objects.get(phone_number=user)
+        if(member):
+            member.latitude = lat
+            member.longitude = lng
+            member.save()
+            group = member.g_id
+            members = UserIsGroupMember.objects.filter(g_id=group)
+            lats = []
+            lngs = []
+            for member in members:
+                lats.append(member.latitude)
+                lngs.append(member.longitude)
+            json_response["dest"] = group.destination
+            json_response["name"] = group.name
+            json_response["lats"] = lats
+            json_response["lngs"] = lngs
+            json_response["status"] = 1
+            return HttpResponse(json.dumps(json_response))
+        else:
+            json_response["status"] = 0
+            return HttpResponse(json.dumps(json_response))
 
     if op == 1:
         phone = input_dict["phone"]
@@ -241,8 +280,8 @@ def group_activity(request):
     # if op==2:
 
     if op == 3:
-		phone = input_dict["phone"]
-		g_id = UserIsGroupMember.objects.get(phone_number=user1).g_id.g_id
-		group = Group.objects.get(g_id=g_id)
-		group.delete()
-		return HttpResponse("Success")
+            phone = input_dict["phone"]
+            g_id = UserIsGroupMember.objects.get(phone_number=user1).g_id.g_id
+            group = Group.objects.get(g_id=g_id)
+            group.delete()
+            return HttpResponse("Success")

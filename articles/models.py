@@ -131,8 +131,11 @@ def create_new_group(name, date_creation, destination):
 
 def add_member_to_group(g_id, phone_number):
     try:
-        UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
-    
+    	if(UserIsGroupMember.objects.get(phone_number=User.objects.get(phone_number=phone_number)) is None):
+        	UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+        else:
+        	raise Exception("Already part of a group")
+
     except:
         raise Exception("Error during adding member to group")
 

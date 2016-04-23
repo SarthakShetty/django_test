@@ -15,8 +15,8 @@ def sign_in(phone_number,password):
 			x.save()
 			return x.session_id
 		else:
-			return x.session_id
-	return 3
+			return 3
+	
 
 def sign_out(phone_number):
 	x=User.objects.get(phone_number=phone_number)

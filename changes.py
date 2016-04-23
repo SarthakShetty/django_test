@@ -7,9 +7,18 @@ def group_activity(request):
 	#2 - group chat
 	#3 - exit group
 	if op==0:
+		phone = input_dict["phone"]
 		gname = input_dict["gname"]
 		gdest = input_dict["gdest"]
+		members = input_dict["members"][1:-1].split(",")
+		#data = request.body[1:-1].split(",")
 		group = Group.objects.create(name=gname,destination=gdest)
+		user = User.objects.get(phone_number=phone)
+		UserIsGroupMember.objects.create(g_id=group,phone_number=user)
+		UserIsAdminGroup.objects.create(g_id=group,phone_number=user)
+		for member in members:
+			try:
+				UserIsGroupMember.objects.create(g_id=group,phone_number=member)
 		##TODO return ?(locations of users to plot on map)?
 		return HttpResponse("Success")
 		
@@ -28,10 +37,11 @@ def group_activity(request):
 		json_response["member_names"] = ";".join(names)
 		json_response["member_phones"] = ";".join(phones)
 		return HttpResponse(json.dumps(json_response))
+	if op==2:
+		
 	if op==3:
 		phone = input_dict["phone"]
-		
-		try:
+\		try:
 			g_id = UserIsGroupMember.objects.get(phone_number=user1).g_id.g_id
 			group = Group.objects.get(g_id=g_id)
 			group.delete()

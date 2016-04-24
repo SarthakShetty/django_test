@@ -231,7 +231,7 @@ def group_activity(request):
             print member
             t = member
             t=(''.join(re.findall("[0-9]+", t))[-10:])
-            user = User.objects.get(phone_number=t)
+            user = User.objects.get(phone_number=tr)
             print type(user)
             UserIsGroupMember.objects.create(g_id=group, phone_number=user)
     	return HttpResponse("Success")

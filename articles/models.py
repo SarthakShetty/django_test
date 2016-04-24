@@ -63,8 +63,8 @@ class UserIsAdminGroup(models.Model):
 class UserIsGroupMember(models.Model):
     g_id = models.ForeignKey('group', on_delete=models.CASCADE)
     phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
-    latitude = models.FloatField(default=0.0)
-    longitude = models.FloatField(default=0.0)
+    latitude = models.CharField(max_length=10,default="0.0")
+    longitude = models.CharField(max_length=10,default="0.0")
 
     class Meta:
         unique_together = ("g_id", "phone_number")

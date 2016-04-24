@@ -51,16 +51,16 @@ class GroupMessage(models.Model):
 
 
 class UserIsAdminGroup(models.Model):
-    g_id = models.OneToOneField('group', on_delete=models.CASCADE)
-    phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("g_id", "phone_number")
 
 
 class UserIsGroupMember(models.Model):
-    g_id = models.OneToOneField('group', on_delete=models.CASCADE)
-    phone_number = models.OneToOneField('user', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
 
@@ -69,18 +69,18 @@ class UserIsGroupMember(models.Model):
 
 
 class UserSendsGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
+    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("phone_number", "gm_id")
 
 
 class UserReceivesGroupMessage(models.Model):
-    phone_number = models.OneToOneField('User', on_delete=models.CASCADE)
-    gm_id = models.OneToOneField('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.OneToOneField('Group', on_delete=models.CASCADE)
+    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
+    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
+    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("phone_number", "gm_id")

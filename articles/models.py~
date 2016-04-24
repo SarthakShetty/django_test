@@ -26,7 +26,7 @@ invalid_phone_numbers = []
 class User(models.Model):
     password = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
-    #age = models.IntegerField()
+    age = models.IntegerField()
     name = models.CharField(max_length=50)
     session_id = models.IntegerField(default=0)
     #photo_url = models.URLField(max_length=100)

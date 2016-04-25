@@ -45,12 +45,7 @@ class Group(models.Model):
     destination = models.CharField(max_length=50)
 
 
-class GroupMessage(models.Model):
-    # Not given by the user, Automatically assigned to user and incremented
-    gm_id = models.AutoField(primary_key=True)
-    video_url = models.URLField(max_length=100)
-    photo_url = models.URLField(max_length=100)
-    text = models.CharField(max_length=500)
+
 
 
 class UserIsAdminGroup(models.Model):
@@ -69,25 +64,6 @@ class UserIsGroupMember(models.Model):
 
     class Meta:
         unique_together = ("g_id", "phone_number")
-
-
-class UserSendsGroupMessage(models.Model):
-    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
-    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ("phone_number", "gm_id")
-
-
-class UserReceivesGroupMessage(models.Model):
-    phone_number = models.ForeignKey('User', on_delete=models.CASCADE)
-    gm_id = models.ForeignKey('GroupMessage', on_delete=models.CASCADE)
-    g_id = models.ForeignKey('Group', on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ("phone_number", "gm_id")
-
 
 class Places(models.Model):
     place_id = models.AutoField(primary_key=True)
@@ -145,7 +121,6 @@ def create_new_user(name, phone_number,password,regid, date_creation=None, photo
     if date_creation == None:
         date_creation = timezone.now()
     try:
-    	print name,age,phone_number,password,date_creation
         User.objects.create(name=name,reg_id=regid, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 
@@ -207,38 +182,6 @@ def make_admin(g_id, phone_number):
     except:
         raise Exception("Error during making " +
                         str(phone_number) + " admin of group " + str(g_id))
-
-
-def send_message_to_group(phone_number, g_id, video_url=None, photo_url=None, text=None):
-    ''' this function automatically handles 
-            -	message creation
-            -	updating the send table
-            -	updating the receive table for all recipients in the group
-    '''
-
-    if video_url == None and photo_url == None and text == None:
-        return
-
-    try:
-        messageEntry = GroupMessage.objects.create(
-            video_url=video_url, photo_url=photo_url, text=text)
-    except:
-        raise Exception("Error during message creation")
-
-    try:
-        UserSendsGroupMessage.objects.create(
-            phone_number=phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
-
-    except:
-        raise Exception("Error updating the table for sender")
-
-    try:
-        for tableEntry in Entry.objects.filter(g_id=g_id):
-            UserReceivesGroupMessage.objects.create(
-                phone_number=tableEntry.phone_number, g_id=g_id, gm_id=messageEntry.gm_id)
-
-    except:
-        raise Exception("Error updating table for recipients")
 
 
 def get_member_coordinates(g_id):

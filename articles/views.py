@@ -285,6 +285,13 @@ def login(request):
 
 
 @csrf_exempt
+def chatroom(request):
+	input_dict = json.loads(request.body)
+    phone = input_dict["phone"]
+    message = input_dict["message"]
+    functions.send_message(phone,message)
+
+@csrf_exempt
 def group_activity(request):
     print request.body
     input_dict = json.loads(request.body)

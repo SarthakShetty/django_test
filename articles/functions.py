@@ -1,6 +1,6 @@
 from models import *
-def Feature3_create_new_user(name, age, phone_number,password, date_creation=None, photo_url=None):
-	create_new_user(name, int(age), phone_number,password)
+def Feature3_create_new_user(name, phone_number,password, date_creation=None, photo_url=None):
+	create_new_user(name, phone_number, password)
 
 def sign_in(phone_number,password):
 	try:

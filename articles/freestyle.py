@@ -168,8 +168,8 @@ def get_distance(coord_1, coord_2):
 
 
 if __name__=="__main__":
-	''' For testing '''
-	pprint(get_best_route("Bangalore, Karnataka", "Mysore, Karnataka", get_points_of_interest("Bangalore, Karnataka", "Mysore, Karnataka")))
+	pprint(get_points_of_interest("Bangalore, Karnataka", "Mysore, Karnataka"))
+	
 
     
 

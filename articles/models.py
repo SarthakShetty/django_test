@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 import datetime
 from django.utils.encoding import python_2_unicode_compatible
+from django.db import IntegrityError
 
 invalid_phone_numbers = []
 
@@ -25,8 +26,9 @@ invalid_phone_numbers = []
 class User(models.Model):
     password = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=10, primary_key=True)  # Given by the user
-    age = models.IntegerField()
+    #age = models.IntegerField()
     name = models.CharField(max_length=50)
+    session_id = models.IntegerField(default=0)
     #photo_url = models.URLField(max_length=100)
     date_creation = models.DateTimeField(default=timezone.now)
 
@@ -61,8 +63,8 @@ class UserIsAdminGroup(models.Model):
 class UserIsGroupMember(models.Model):
     g_id = models.ForeignKey('group', on_delete=models.CASCADE)
     phone_number = models.ForeignKey('user', on_delete=models.CASCADE)
-    latitude = models.FloatField(default=0.0)
-    longitude = models.FloatField(default=0.0)
+    latitude = models.CharField(max_length=10,default="0.0")
+    longitude = models.CharField(max_length=10,default="0.0")
 
     class Meta:
         unique_together = ("g_id", "phone_number")
@@ -129,23 +131,25 @@ def create_new_group(name, date_creation, destination):
 
 def add_member_to_group(g_id, phone_number):
     try:
-        UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
-    
+        if(UserIsGroupMember.objects.get(phone_number=User.objects.get(phone_number=phone_number)) is None):
+            UserIsGroupMember.objects.create(g_id=g_id, phone_number=phone_number)
+        else:
+            raise Exception("Already part of a group")
+
     except:
         raise Exception("Error during adding member to group")
 
 
-def create_new_user(name, age, phone_number,password, date_creation=None, photo_url=None):
+def create_new_user(name, phone_number, password, date_creation=None, photo_url=None):
     if date_creation == None:
         date_creation = timezone.now()
     try:
-        print name,age,phone_number,password,date_creation
-        User.objects.create(name=name, age=age, phone_number=phone_number,password=password,
+        print name, phone_number, password, date_creation
+        User.objects.create(name=name, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 
-    except:
-        print("Error:", name, age, phone_number, password)
-        raise Exception("Error during creating user")
+    except IntegrityError:        
+        raise IntegrityError("Error during creating user")
 
 
 def create_new_group(name, destination, date_creation=None):

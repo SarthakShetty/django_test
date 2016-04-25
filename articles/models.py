@@ -145,7 +145,6 @@ def create_new_user(name, phone_number,password,regid, date_creation=None, photo
     if date_creation == None:
         date_creation = timezone.now()
     try:
-    	print name,age,phone_number,password,date_creation
         User.objects.create(name=name,reg_id=regid, phone_number=phone_number,password=password,
                             date_creation=date_creation)
 

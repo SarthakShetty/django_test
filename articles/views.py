@@ -251,7 +251,7 @@ def login(request):
         phone = input_dict["phone"]
         regid = input_dict["regid"]
         try:
-            functions.Feature3_create_new_user(name, phone, pwd,regid)
+            functions.Feature3_create_new_user(name, phone, pwd,regids)
         except IntegrityError:
             return HttpResponse("User Already Exists")
         return HttpResponse("User created")

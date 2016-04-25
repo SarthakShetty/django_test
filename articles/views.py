@@ -1,28 +1,55 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.template.loader import get_template
+from articles.models import *
 from django.core import serializers
+from django.db import IntegrityError
+from django.http import *
+from django.shortcuts import render
 from django.template import Context
 from django.template import RequestContext
+from django.template.loader import get_template
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.db import IntegrityError
+from models import *
+from random import randrange
+from random import shuffle
+from gen_diary import get_diary
+from queries import (on_start_trip, on_finish_trip, 
+        check_in, display_trip_details, view_trips, 
+        check_if_trip_exists, insert_review, get_places)
+import datetime
+import freestyle
 import json
 import re
-#from models import *
 import roundabout
-import freestyle
 import functions
 
-# feature 4 imports
-from random import shuffle
-from random import randrange
-from django.utils import timezone
-from queries import on_start_trip, on_finish_trip, check_in, display_trip_details, view_trips, check_if_trip_exists, insert_review, get_places
-from gen_diary import get_diary
-from articles.models import *
-
+try:
+    import urllib2
+except:
+    print("Run with python2")
 
 @csrf_exempt
+def homepage(request):
+    now = datetime.datetime.now()
+    html = """<!doctype html><html><body style="background-image:url('https://impythonist.files.wordpress.com/2015/06/1666323.png'); background-size:cover; background-repeat: no-repeat;"><h3>Welcome to EGM's backend Django server! <br><br>It is now %s. </h3> """  % now + """
+
+<h4> Views for feature 1 (that should be implemented but haven't) <h4>
+<pre>
+@csrf_exempt
+def freestyle_getroute(request):
+    ''' Get source, destination, and some points of interest. Return an optimal route json for rendering at the front end '''
+    exec("source  = request.%s['source']" %request.method)
+    exec("dest    = request.%s['dest']" %request.method)
+    exec("json_waypoints    = json.loads(request.%s['json_waypoints'])" %request.method)
+    #json_waypoints = request.body
+    optimal_route = freestyle.get_best_route(source, dest, json_waypoints)
+
+    return HttpResponse(json.dumps(optimal_route, indent=4), content_type="application/json")
+
+@csrf_exempt
+def freestyle_getpoints(request):
+    ''' Get source and destination from user, and return points of interest '''
+    exec("source  = request.%s['source']" %request.method)
+    exec("dest    = request.%s['dest']" %request.method)
 def Feature2(request):
     if request.method == "POST":
         l = request.body.split("::")
@@ -36,7 +63,6 @@ def Feature2(request):
             location, int(radius) * 1000, no_users)
         return HttpResponse(json.dumps(json_places))
 
-
 @csrf_exempt
 def Feature1_Module2(request):
     data = request.body[1:-1].split(",")
@@ -46,16 +72,66 @@ def Feature1_Module2(request):
                            indent=4, separators=(',', ': '))
     return HttpResponse('{ "route" :[' + json_dict + "\n]}")
 
+    points_of_interest = freestyle.get_points_of_interest(source, dest)
+    return HttpResponse(json.dumps(points_of_interest, indent=4))
+    </pre>
+</body></html>"""
+
+    return HttpResponse(html)
+
+
+@csrf_exempt
+def Feature2(request):
+    if request.method == "POST":
+        l = request.body.split("::")
+        print(request.body)
+        no_users = len(l) - 1
+        if no_users > 1:
+            location = l[0:1] + l[2:]
+        else:
+            location = [l[0]]
+        radius = l[1][0:-2]
+        json_places = roundabout.feature2(
+            location, int(radius) * 1000, no_users)
+        print(json_places)
+        return HttpResponse(json.dumps(json_places))
+
+@csrf_exempt
+def Feature1_Module2(request):
+    data = request.body.split("::")
+    #print(json.loads(data[2]))
+    if(len(data)>2):
+        final_dict = freestyle.get_best_route(data[0], data[1], json.loads(data[2]))  # Goes into Feature1_Module2
+    else:
+        print(request.body)
+        final_dict = freestyle.get_best_route(data[0], data[1], None)
+
+    src_coord = freestyle.get_geocoded_address(data[0])
+    src_dict = {'lat':src_coord[0], 'lng':src_coord[1]};
+    dst_coord = freestyle.get_geocoded_address(data[1])
+    dst_dict = {'lat':dst_coord[0], 'lng':dst_coord[1]};
+
+    json_dict = json.dumps({"src" : src_dict, "dst" : dst_dict, "route" : [final_dict]}, sort_keys=True,
+                           indent=4, separators=(',', ': '))
+
+    print("LENGTH: ", len(json_dict))
+
+    return HttpResponse(json_dict)
+
 
 @csrf_exempt
 def Feature1_Module1(request):
-    data = request.body.split("::")
-    print data
-    full_dict = freestyle.get_points_of_interest(
-        data[0], data[1])  # Goes into Feature1_Module1
-    json_str = json.dumps(full_dict, sort_keys=True,
-                          indent=4, separators=(',', ': '))
-    return HttpResponse(json_str)
+    try:
+
+        data = request.body.split("::")
+        print data
+        full_dict = freestyle.get_points_of_interest(
+            data[0], data[1])  # Goes into Feature1_Module1
+        json_str = json.dumps(full_dict, sort_keys=True,
+                              indent=4, separators=(',', ': '))
+        return HttpResponse(json_str)
+    except:
+        return HttpResponse("")
 
 
 '''
@@ -173,28 +249,30 @@ def login(request):
         name = input_dict["name"]
         pwd = input_dict["password"]
         phone = input_dict["phone"]
-        age = input_dict["age"]
         try:
-            functions.Feature3_create_new_user(name, int(age), phone, pwd)
+            functions.Feature3_create_new_user(name, phone, pwd)
         except IntegrityError:
             return HttpResponse("User Already Exists")
         return HttpResponse("User created")
+
     elif op == 1:
         phone = input_dict["phone"]
         pwd = input_dict["password"]
         status = functions.sign_in(phone, pwd)
+
         if status == 1:
-            n = User.objects.get(phone_number=phone).name
-            print "1:"+n
-            return HttpResponse("1:"+n)
+            n = User.objects.get(phone_number=phone)
+            print "1::"+n.name+"::"+str(n.date_creation).split()[0]
+            return HttpResponse("1::"+n.name+"::"+str(n.date_creation).split()[0])
         elif status == 2:
-            return HttpResponse("User does not exist")
+            return HttpResponse("2::User does not exist")
         elif status == 3:
-            return HttpResponse("Incorrect password")
+            return HttpResponse("3::Incorrect password")
         elif status == 4:
-            return HttpResponse("Already Logged In")
+            return HttpResponse("4::Already Logged In")
         else:
-        	return HttpResponse("Error")
+            return HttpResponse("Error")
+
     elif op == 2:
         phone = input_dict["phone"]
         try:
@@ -234,7 +312,7 @@ def group_activity(request):
             user = User.objects.get(phone_number=t)
             print type(user)
             UserIsGroupMember.objects.create(g_id=group, phone_number=user)
-    	return HttpResponse("Success")
+        return HttpResponse("Success")
     if op == 4:
         print "came here"
         phone = input_dict["phone"]
@@ -248,7 +326,7 @@ def group_activity(request):
             json_response["status"] = 0
             print json_response
             return HttpResponse(json.dumps(json_response))
-        	
+            
         if(member):
             member.latitude = lat
             member.longitude = lng
@@ -287,12 +365,12 @@ def group_activity(request):
         return HttpResponse(json.dumps(json_response))
     # if op==2:
     if op==5:
-    	phone = input_dict["phone"]
-    	lat = input_dict["lat"]
-    	lng = input_dict["lng"]
-    	phones = []
+        phone = input_dict["phone"]
+        lat = input_dict["lat"]
+        lng = input_dict["lng"]
+        phones = []
         names = []
-    	json_response={}
+        json_response={}
         user = User.objects.get(phone_number=phone)
         member = UserIsGroupMember.objects.get(phone_number=user)
         member.latitude = lat
@@ -317,7 +395,7 @@ def group_activity(request):
         
 
     if op == 3:
-    	phone = input_dict["phone"]
-    	user = UserIsGroupMember.objects.get(phone_number=phone)
-    	user.delete()
-    	return HttpResponse("Success")
+        phone = input_dict["phone"]
+        user = UserIsGroupMember.objects.get(phone_number=phone)
+        user.delete()
+        return HttpResponse("Success")

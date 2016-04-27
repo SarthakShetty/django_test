@@ -10,15 +10,13 @@
 
 from googleplaces import GooglePlaces,types,lang
 from define_circle import make_circle
-import json
 import re
-
 try:
     import urllib2
 except:
     print("Run with python2")
 
-api_key = 'AIzaSyCQd3oHe34SNelQzLuT6KSdA3ajCqt-gp8'
+api_key = 'AIzaSyCyr22Z9rtPUYH5QpeBuIPU_2ITgCSBG78'
 
 google_places = GooglePlaces(api_key)   #initialize
 url = 'https://maps.googleapis.com/maps/api/geocode/json?address=__HOLDER__'
@@ -31,14 +29,8 @@ def url_translate(address):
 def get_coordinates(location):
 
     #returns coordinates of location specified in variable 'location'
-    print("sanity check", location)
-    location = json.loads(urllib2.urlopen(url_translate(location)).read())
-    if location['status'] != "OK":
-        raise Exception("Error during geocoding")
-
-
+    location = eval(urllib2.urlopen(url_translate(location)).read())
     loc_coord = location['results'][0]['geometry']['location'].values()
-
     return loc_coord
 
 def get_coordinates_of_users(list_of_locations):
@@ -72,8 +64,8 @@ def get_details_of_all_places(query_results,num_places=5):
             break
         place.get_details()
         details.append({
-            "Name":str(place.name), "Rating":float(place.rating) if type(place.rating) is not type("") else 0.0,
-            "Address":place.formatted_address, "Url":str(place.url)
+            "Name":str(place.name), "Rating":float(place.rating),
+            "Address":str(place.formatted_address), "Url":str(place.url)
             })
         count += 1
 
@@ -160,11 +152,10 @@ def put_everything_in_dictionary(coordinates_of_places,points,details):
     return dictionary
 
 
-    
+	
 #if __name__ == "__main__":
 def feature2(user_location,search_radius,num_users=1):
     #num_users = int(input("Enter the number of users."))
-    print("FEATURE 2", user_location, search_radius, num_users)
     if(num_users == 0):
         print("Enter 1 or more number of users.")
 
@@ -175,15 +166,11 @@ def feature2(user_location,search_radius,num_users=1):
                 )
 
         locations = list()
-        locations.append(user_location[0])
+        locations.append(user_location)
 
-        print(query_results.places)
-
-
-        coordinates_of_places = get_coordinates_of_places(query_results,num_places=len(query_results.places))
+	coordinates_of_places = get_coordinates_of_places(query_results,num_places=3)
         points = get_coordinates_of_users(locations)
-        details = get_details_of_all_places(query_results,num_places=len(query_results.places))
-
+        details = get_details_of_all_places(query_results,num_places=3)
 
         #place_dictionary is a dict of everything about all
         # the places
@@ -204,7 +191,7 @@ def feature2(user_location,search_radius,num_users=1):
         query_results = google_places.nearby_search(
                 lat_lng={'lat':circle[0], 'lng':circle[1]},
                 radius=circle[2]*100000, sensor=False, keyword=None,
-                types=[types.TYPE_FOOD, types.TYPE_CAFE, TYPE_MOVIE_THEATER, TYPE_PARK, TYPE_ZOO]
+                types=[types.TYPE_FOOD]
                 )
 
         #display_places_names(query_results)
@@ -215,9 +202,6 @@ def feature2(user_location,search_radius,num_users=1):
         coordinates_of_places = get_coordinates_of_places(query_results,num_places=3)
         details = get_details_of_all_places(query_results,num_places=3)
         place_dictionary = put_everything_in_dictionary(coordinates_of_places,
-                points,details) 
+                points,details)	
         return place_dictionary
 
-if __name__ == "__main__":
-    import pprint
-    pprint.pprint(feature2(["PESIT South Campus, Bangalore, Karnataka"],15000,num_users=1))

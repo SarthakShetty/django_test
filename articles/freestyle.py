@@ -19,6 +19,7 @@ import copy
 import googlemaps
 import math
 import sys
+import json
 
 try:
     import urllib2
@@ -35,12 +36,12 @@ gmaps = googlemaps.Client(API_KEY)  # initialize client
 ''' Defining template URL strings '''
 URL_dir = 'https://maps.googleapis.com/maps/api/directions/json?origin=__SRC__&destination=__DEST__&key=%s' % API_KEY  # 1) template URL string for quering the directions API
 URL_geo = 'https://maps.googleapis.com/maps/api/geocode/json?address=__ADD__&key=%s' %API_KEY # 3) template URL string for quering the geocoding API
-URL_rev_geo = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=__LATLNG__&result_type=administrative_area_level_1&key=%s' %API_KEY  # 2) template URL string for quering the reverse-geocoding API
+URL_rev_geo = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=__LATLNG__&result_type=administrative_area_level_2&key=%s' %API_KEY  # 2) template URL string for quering the reverse-geocoding API
 
 
 def get_geocoded_address(address):
 	''' Converts a human readable address into its correponding latlng coordinates and returns it as a list '''
-	geocoded_json_result = eval(urllib2.urlopen(URL_geo.replace('__ADD__', address.replace(" ", "+"))).read())	# send geocoding query
+	geocoded_json_result = json.loads(urllib2.urlopen(URL_geo.replace('__ADD__', address.replace(" ", "+"))).read())	# send geocoding query
 
 	# Status check
 	if geocoded_json_result['status'] == "ZERO_RESULTS": 
@@ -60,7 +61,7 @@ def get_points_of_interest(source, dest):
     dest_coord = Coordinates(*get_geocoded_address(dest))
     
     # Send a directions query with the given source and destination coordinates. This seems redundant but is necessary to extract the bounding coordinates for the source and destination
-    route_json_result = eval(urllib2.urlopen(URL_dir.replace('__SRC__', googlemaps.convert.latlng(src_coord)).replace('__DEST__', googlemaps.convert.latlng(dest_coord))).read()) 
+    route_json_result = json.loads(urllib2.urlopen(URL_dir.replace('__SRC__', googlemaps.convert.latlng(src_coord)).replace('__DEST__', googlemaps.convert.latlng(dest_coord))).read()) 
 
     # Status check
     if route_json_result["status"] != "OK":
@@ -71,20 +72,21 @@ def get_points_of_interest(source, dest):
     bounds_northeast, bounds_southwest = Coordinates(*OrderedDict(bounds["northeast"]).values()), Coordinates(*OrderedDict(bounds["southwest"]).values())
     center = get_midpoint(bounds_northeast, bounds_southwest) # get the center point coordinate between the bounding-box coordinates
     radius = get_distance(center, bounds_northeast) # get the length of the half-diagonal between the two bounding-box coordinates
-
 	# Send a reverse geocoding query for the center coordinate. This is needed to bias the places query results. The query will return only the English readable administrative level 1 address (in other words, the name of the state or union territory in which the coordinates reside)
-    place_bias_json_result = eval(urllib2.urlopen(URL_rev_geo.replace('__LATLNG__', googlemaps.convert.latlng(list(center)))).read()) 
+    place_bias_json_result = json.loads(urllib2.urlopen(URL_rev_geo.replace('__LATLNG__', googlemaps.convert.latlng(list(center)))).read()) 
 
     # Status check
     if place_bias_json_result['status'] != "OK":
         return {}
 
     # Extract the state/union territory name
-    place_bias = place_bias_json_result['results'][0]['address_components'][0]['long_name']
+    place_bias = [place['long_name'] for place in place_bias_json_result['results'][0]['address_components']]
 
+    print(radius, place_bias, (place_bias[0] if radius < 30 else place_bias[1] if radius < 100 else place_bias[2]))
+    
     # Send a places query to find points of interest with the given location and radius biases
-    places_json_result = gmaps.places("tourism, restaurants " + place_bias , location=list(src_coord), radius=radius)
-
+    # Vary the biasing depending on the distance b/w source and destination
+    places_json_result = gmaps.places("tourism, restaurants in " + (place_bias[0] if radius < 20 else place_bias[1] if radius < 100 else place_bias[2]), location=list(center), radius=radius)
     # Status check
     if places_json_result["status"] != "OK":
         return {}
@@ -98,7 +100,8 @@ def get_points_of_interest(source, dest):
         if 'tour' in result['name'].lower() or 'travels' in result['name'].lower(): 
             continue
         try:
-            if result['rating'] >= 4.0:
+            if result['rating'] >= 3.0:
+                print(result['name'])
                 points_of_interest[result['name']] = result
         except: 
             continue    # don't bother with seedy places
@@ -116,11 +119,11 @@ def get_best_route(source, dest, waypoints=None):
     
     # Test if there are no specified waypoints, and return the json result of a very simple directions query
     if waypoints == None or len(waypoints) == 0: 
-        return eval(urllib2.urlopen(URL_geo.replace('__LATLNG__', googlemaps.convert.latlng(list(center)))).read())
+        return json.loads(urllib2.urlopen(URL_dir.replace('__SRC__', googlemaps.convert.latlng(src_coord)).replace('__DEST__', googlemaps.convert.latlng(dest_coord))).read()) 
 
     waypoint_latlng_list = []
 
-    # Extracy coordinates of each waypoint from the waypoints dictionary
+    # Extract coordinates of each waypoint from the waypoints dictionary
     for waypoint in waypoints.keys():
         waypoint_latlng_list.append(waypoints[waypoint]['geometry']['location'])
 
@@ -128,7 +131,7 @@ def get_best_route(source, dest, waypoints=None):
     waypoint_polyline_str = googlemaps.convert.encode_polyline(waypoint_latlng_list)
 
     # Send a directions query with the given source, destination coordinates, and waypoints list encoded as a polyline
-    route_json_result = eval(urllib2.urlopen(URL_dir.replace('__SRC__', googlemaps.convert.latlng(src_coord)).replace('__DEST__', googlemaps.convert.latlng(dest_coord)) + '&waypoints=optimize:true|enc:' + waypoint_polyline_str + ':').read())
+    route_json_result = json.loads(urllib2.urlopen(URL_dir.replace('__SRC__', googlemaps.convert.latlng(src_coord)).replace('__DEST__', googlemaps.convert.latlng(dest_coord)) + '&waypoints=optimize:true|enc:' + waypoint_polyline_str + ':').read())
 
     # Status check
     if route_json_result["status"] != "OK":
@@ -165,6 +168,11 @@ def get_distance(coord_1, coord_2):
 
 
 if __name__=="__main__":
-	''' For testing '''
-	pprint(get_best_route("Bangalore, Karnataka, India", "Mysore, Karnataka, India", get_points_of_interest("Bangalore, Karnataka, India", "Mysore, Karnataka, India")))
+	pprint(get_points_of_interest("Bangalore, Karnataka", "Mysore, Karnataka"))
+	
+
+    
+
+
+
 

@@ -34,16 +34,18 @@ def sign_out(phone_number):
 
 def send_message(phone,message):
 	data = {};notification={};payload={}
-	user = User.objects.objects.get(phone_number=phone)
+	print phone,message
+	user = User.objects.get(phone_number=phone)
 	group = UserIsGroupMember.objects.get(phone_number=user).g_id
-	members = UserIsGroupMember.objects.filter(group = g_id)
+	members = UserIsGroupMember.objects.filter(g_id = group)
 	data["message"] =  message
-	data["name"] = member.phone_number.name
-	notification["body"] =  member.phone_number.name + " : " + data["message"]
+	
 	notification["title"] = "New message from EGM : " + group.name
 	payload["notification"] = notification
 	payload["data"] = data
 	for member in members:
-		if member.phone_number.phone_number != phone :
+		if member.phone_number.phone_number != phone  and member.phone_number.reg_id!="":
 			payload["to"] = member.phone_number.reg_id
+			data["name"] = user.name
+			notification["body"] =  member.phone_number.name + " : " + data["message"]
 			requests.post(url,data=json.dumps(payload),headers=headers)

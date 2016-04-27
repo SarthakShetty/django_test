@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^f4', 'articles.views.index'),
     url(r'^login', 'articles.views.login'),
     url(r'^test', 'articles.views.group_activity'),
-    url(r'^chat', 'articles.views.group_activity'),
+    url(r'^chat', 'articles.views.chatroom'),
    
     #url(r'^admin/', admin.site.urls),
 ]

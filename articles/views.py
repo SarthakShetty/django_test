@@ -251,7 +251,7 @@ def login(request):
         phone = input_dict["phone"]
         regid = input_dict["regid"]
         try:
-            functions.Feature3_create_new_user(name, phone, pwd,regids)
+            functions.Feature3_create_new_user(name, phone, pwd,regid)
         except IntegrityError:
             return HttpResponse("User Already Exists")
         return HttpResponse("User created")
@@ -286,10 +286,13 @@ def login(request):
 
 @csrf_exempt
 def chatroom(request):
+	print "CHAT PLS"
 	input_dict = json.loads(request.body)
-    phone = input_dict["phone"]
-    message = input_dict["message"]
-    functions.send_message(phone,message)
+	print input_dict
+	phone = input_dict["phone"]
+	message = input_dict["message"]
+	functions.send_message(phone,message)
+	return HttpResponse("Success")
 
 @csrf_exempt
 def group_activity(request):
@@ -304,7 +307,7 @@ def group_activity(request):
     # 4 - check if group
     # 5 - map
     if op == 0:
-        phone = input_dict["phone"]
+        phone = input_dict["phone"];
         gname = input_dict["gname"]
         gdest = input_dict["gdest"]
         members = input_dict["members"][1:-1].split(",")
